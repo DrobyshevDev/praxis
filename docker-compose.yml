@@ -1,6 +1,13 @@
 # Postgres + pgvector для реального индекса (v1). Порт 5434, чтобы не конфликтовать
 # с ARC (5433). BM25-срез v0 работает без БД — этот стек нужен для dense/hybrid.
 services:
+  # Приложение из коробки: без токенов, ключей и GPU (офлайн + полный корпус ГК).
+  #   docker compose up app  ->  http://localhost:8077
+  app:
+    build: .
+    ports:
+      - "8077:8077"
+
   db:
     image: pgvector/pgvector:pg16
     environment:
