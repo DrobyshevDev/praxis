@@ -30,6 +30,7 @@ dev = ["pytest>=8.0", "ruff>=0.4"]
 [project.scripts]
 praxis-demo = "praxis.demo:main"
 praxis-ask = "praxis.ask:main"
+praxis-eval = "praxis.eval.runner:main"
 
 [build-system]
 requires = ["hatchling"]

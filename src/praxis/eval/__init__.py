@@ -1,7 +1,21 @@
-"""Eval-харнесс (v1).
+"""Eval-харнесс: golden set + метрики + HTML-дашборд качества.
 
-RAGAS + собственные легал-метрики: faithfulness (цель ≥0.9), citation
-precision/recall, доля непроверенных цитат, корректность реквизитов. Golden set из
-реальных юр-вопросов, регрессионные прогоны на каждом релизе, drift-мониторинг
+RAGAS-faithfulness (требует LLM) подключается хуком; по умолчанию считаем
+детерминированные метрики ретривера/цитат. Регрессии — на каждом релизе; drift —
 через mlango (DrobyshevDev).
 """
+
+from .golden import GOLDEN, GoldenCase
+from .metrics import citation_precision, mrr, precision_at_k, recall_at_k
+from .runner import EvalReport, run_eval
+
+__all__ = [
+    "GOLDEN",
+    "EvalReport",
+    "GoldenCase",
+    "citation_precision",
+    "mrr",
+    "precision_at_k",
+    "recall_at_k",
+    "run_eval",
+]

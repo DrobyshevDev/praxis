@@ -16,9 +16,10 @@ env/
 .coverage
 htmlcov/
 
-# Данные и модели (в репо не храним)
+# Данные, модели, отчёты (в репо не храним)
 data/
 models/
+reports/
 *.sqlite
 *.db
 
