@@ -1,15 +1,17 @@
-"""FastAPI-приложение Praxis: /ask, /search, /health + веб-UI.
+"""FastAPI-приложение Praxis: открытый API (/v1) + веб-UI.
 
-Пайплайн собирается один раз при первом обращении (build_pipeline с настройками из
-окружения). По умолчанию — офлайн-fallback; с extra `ml`/`llm` и ключами включаются
-реальные модели и Claude без изменения кода.
+Одно API-ядро обслуживает все клиенты: веб-UI, будущие desktop/mobile и сторонних
+ML-специалистов. CORS открыт (API только на чтение), интерактивная схема — на /docs,
+машиночитаемая — на /openapi.json. Пайплайн строится один раз при первом обращении.
 """
 
 from __future__ import annotations
 
-from fastapi import FastAPI
+from fastapi import APIRouter, FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 
+from .. import __version__
 from ..config import config_from_env
 from ..pipeline import build_pipeline
 from .schemas import (
@@ -24,8 +26,21 @@ from .ui import INDEX_HTML
 
 app = FastAPI(
     title="Praxis API",
-    version="0.1.0",
-    description="Юридический ассистент по праву РФ с проверяемыми цитатами.",
+    version=__version__,
+    description=(
+        "Юридический ассистент по праву РФ с проверяемыми цитатами. "
+        "Открытый API на чтение: /v1/ask отвечает со ссылками на нормы и проверкой "
+        "цитат, /v1/search — сырой поиск по корпусу. Схема: /openapi.json."
+    ),
+    contact={"name": "DrobyshevDev", "url": "https://github.com/DrobyshevDev/praxis"},
+    license_info={"name": "Apache-2.0"},
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["GET", "POST"],
+    allow_headers=["*"],
 )
 
 _pipeline = None
@@ -38,18 +53,23 @@ def get_pipeline():
     return _pipeline
 
 
-@app.get("/health")
+@app.get("/health", tags=["service"])
 def health() -> dict:
-    return {"status": "ok"}
+    return {"status": "ok", "version": __version__}
 
 
-@app.get("/", response_class=HTMLResponse)
+@app.get("/", response_class=HTMLResponse, include_in_schema=False)
 def index() -> str:
     return INDEX_HTML
 
 
-@app.post("/ask", response_model=AnswerOut)
+v1 = APIRouter(prefix="/v1", tags=["v1"])
+
+
+@v1.post("/ask", response_model=AnswerOut, summary="Ответ на юридический вопрос")
 def ask(req: AskRequest) -> AnswerOut:
+    """Вопрос → ответ со ссылками на нормы, span-подсветкой, проверкой цитат,
+    трейсом рассуждения и релевантной судебной практикой."""
     answer = get_pipeline().answer(req.question)
     verdict_by_id = {
         vc.citation.provision.id: vc.verdict.value for vc in answer.verified
@@ -88,9 +108,9 @@ def ask(req: AskRequest) -> AnswerOut:
     )
 
 
-@app.post("/search", response_model=list[SearchHit])
+@v1.post("/search", response_model=list[SearchHit], summary="Поиск норм по запросу")
 def search(req: SearchRequest) -> list[SearchHit]:
-    # Ретривер может расширять пул (graph-hops) сверх top_k — на выдаче режем до top_k.
+    """Сырой поиск по корпусу (для ML-специалистов): гибрид + reranker, без генерации."""
     hits = get_pipeline().retriever.search(req.query, top_k=req.top_k)[: req.top_k]
     return [
         SearchHit(
@@ -102,3 +122,6 @@ def search(req: SearchRequest) -> list[SearchHit]:
         )
         for h in hits
     ]
+
+
+app.include_router(v1)

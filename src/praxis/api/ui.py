@@ -61,7 +61,7 @@ async function ask(){
   const question=q.value.trim(); if(!question) return;
   b.disabled=true; b.textContent='...'; out.innerHTML='';
   try{
-    const r=await fetch('/ask',{method:'POST',headers:{'Content-Type':'application/json'},
+    const r=await fetch('/v1/ask',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({question})});
     const a=await r.json();
     render(a);

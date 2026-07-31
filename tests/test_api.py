@@ -24,7 +24,7 @@ def test_index_served():
 
 def test_ask_returns_grounded_answer():
     r = client.post(
-        "/ask", json={"question": "Можно ли расторгнуть договор через суд при нарушении?"}
+        "/v1/ask", json={"question": "Можно ли расторгнуть договор через суд при нарушении?"}
     )
     assert r.status_code == 200
     data = r.json()
@@ -35,7 +35,7 @@ def test_ask_returns_grounded_answer():
 
 
 def test_search_endpoint():
-    r = client.post("/search", json={"query": "толкование договора", "top_k": 3})
+    r = client.post("/v1/search", json={"query": "толкование договора", "top_k": 3})
     assert r.status_code == 200
     hits = r.json()
     assert len(hits) <= 3
@@ -43,5 +43,12 @@ def test_search_endpoint():
 
 
 def test_ask_rejects_empty_question():
-    r = client.post("/ask", json={"question": ""})
+    r = client.post("/v1/ask", json={"question": ""})
     assert r.status_code == 422
+
+
+def test_openapi_schema_available():
+    r = client.get("/openapi.json")
+    assert r.status_code == 200
+    paths = r.json()["paths"]
+    assert "/v1/ask" in paths and "/v1/search" in paths
