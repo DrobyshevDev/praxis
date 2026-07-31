@@ -67,14 +67,17 @@ Caselaw Access Project — открытые данные уже есть). РФ 
 
 ## Дорожная карта
 
-- **v0 — Foundation.** Скелет платформы, интерфейсы, загрузка 3–4 ключевых
-  кодексов, легал-aware чанкинг (по статьям/пунктам), гибридный индекс, baseline-ответ.
-- **v1 — Trustworthy Q&A.** Полный корпус кодексов + ФЗ, reranker, Citation
-  Verifier, agentic self-RAG, eval-харнесс + дашборд, FastAPI + минимальный веб-UI.
+- **v0 — Foundation.** ✅ Скелет платформы, доменные модели, легал-aware чанкинг, baseline BM25.
+- **v1 — Trustworthy Q&A.** ✅ Гибридный retrieval (BM25+dense) + reranker, Citation
+  Verifier (NLI), agentic self-RAG с трейсом, eval-харнесс + дашборд, FastAPI + веб-UI.
+  Каждый ML-компонент pluggable: реальная модель на GPU / Claude + детерминированный офлайн-fallback.
+  *Осталось на v1:* заменить образец реальным корпусом кодексов с pravo.gov.ru.
 - **v2 — Судебная практика + Graph.** Data-пайплайн практики, граф «норма ↔ дела»,
   multi-hop рассуждения, «есть ли практика за/против».
 - **v3 — Продуктивизация.** Аккаунты, история, экспорт с оформленными ссылками,
   мониторинг изменений редакций, международный корпус (EU/US).
+
+Как запускать — см. [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
 
 ## Стек и экосистема DrobyshevDev
 

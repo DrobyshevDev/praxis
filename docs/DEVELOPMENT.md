@@ -1,61 +1,74 @@
 # Разработка
 
-## Быстрый старт (v0)
+## Быстрый старт (без зависимостей)
 
-v0-срез (ingest + BM25) работает **без зависимостей и без БД** — только стандартная
-библиотека Python 3.11+.
+Весь пайплайн работает **офлайн, на чистой стандартной библиотеке** — детерминированные
+fallback-компоненты. Python 3.11+.
 
 ```bash
 # из корня репозитория
-python -m pytest -q                       # тесты (нужен pytest: pip install pytest)
-PYTHONPATH=src python -m praxis.demo "толкование неясного условия договора"
+python -m pytest -q                                  # тесты (pip install pytest)
+PYTHONPATH=src python -m praxis.ask "можно ли расторгнуть договор через суд"
+PYTHONPATH=src python -m praxis.demo "толкование договора"   # только BM25-срез
+PYTHONPATH=src python -m praxis.eval                 # прогон метрик → reports/
 ```
 
 Windows PowerShell:
 
 ```powershell
-$env:PYTHONPATH="src"; python -m praxis.demo "толкование неясного условия договора"
+$env:PYTHONPATH="src"; python -m praxis.ask "можно ли расторгнуть договор через суд"
 ```
 
-Или установить пакет в editable-режиме и пользоваться консольной командой:
+Или editable-установка с консольными командами:
 
 ```bash
 pip install -e ".[dev]"
-praxis-demo "как расторгнуть договор через суд"
+praxis-ask "как суд толкует неясное условие договора"
+praxis-eval
 pytest -q
 ```
 
-## Инфраструктура (нужна с v1)
-
-Реальный индекс (dense/hybrid) живёт в Postgres + pgvector:
+## Веб-API и UI
 
 ```bash
-docker compose up -d          # поднимет БД на порту 5434 и применит schema.sql
+pip install -e ".[api]"
+uvicorn praxis.api.app:app --port 8077
+# открыть http://127.0.0.1:8077  — простой UI
+# POST /ask {"question": "..."}  ·  POST /search {"query":"...","top_k":5}  ·  GET /health
 ```
 
-ML-модели (эмбеддинги BGE-M3, reranker, NLI-верификатор) — тяжёлые, ставятся
-отдельным extra и гоняются на GPU:
+## Реальные модели и LLM (продакшн-путь)
+
+Один и тот же код: `default_*()` сами включают реальные реализации при наличии
+зависимостей/ключей — менять ничего не надо.
 
 ```bash
-pip install -e ".[ml]"
+pip install -e ".[ml]"     # BGE-M3, cross-encoder reranker, NLI-верификатор (GPU)
+pip install -e ".[llm]"    # Claude
+export ANTHROPIC_API_KEY=...   # включает LLM-синтез вместо экстрактивного ответа
+docker compose up -d           # Postgres + pgvector (реальный индекс), порт 5434
 ```
 
 ## Что где
 
 | Пакет | Назначение | Статус |
 |-------|-----------|--------|
-| `core` | доменные модели (Акт→Статья→Норма→Цитата) | ✅ v0 |
-| `ingest` | источники, нормализация, легал-aware чанкинг | ✅ v0 (образец) |
-| `retrieve` | BM25 baseline; hybrid + rerank | ✅ BM25 / 🔜 v1 |
-| `index` | схема Postgres + pgvector | 🔜 v1 |
-| `verify` | Citation Verifier (NLI) | 🔜 v1 (контракт готов) |
-| `agent` | self-RAG на glia | 🔜 v1 |
-| `generate` | сборка ответа со span-цитатами | 🔜 v1 |
-| `eval` | RAGAS + legal-метрики, дашборд | 🔜 v1 |
-| `api` | FastAPI | 🔜 v1 |
+| `core` | доменные модели (Акт→Статья→Норма→Цитата) | ✅ |
+| `ingest` | источники, нормализация, легал-aware чанкинг | ✅ (образец) |
+| `embed` | BGE-M3 (реальный) + hashing fallback | ✅ |
+| `retrieve` | BM25 + dense + hybrid RRF | ✅ |
+| `rerank` | cross-encoder BGE + лексический fallback | ✅ |
+| `verify` | Citation Verifier: NLI + эвристика | ✅ |
+| `llm` / `generate` | Claude/Mock + экстрактивный/LLM генератор | ✅ |
+| `agent` | self-RAG луп с трейсом | ✅ |
+| `eval` | golden set, метрики, HTML-дашборд | ✅ |
+| `api` | FastAPI + веб-UI | ✅ |
+| `index` | схема Postgres + pgvector | ✅ (SQL) |
 
 ## Договорённости
 
 - Ветка по умолчанию — `master`.
-- Тексты норм в `ingest/sources` на v0 — **образец, не сверенная редакция**. На v1
-  заменяются официальным машиночитаемым текстом с pravo.gov.ru (с реквизитами).
+- Тексты норм в `ingest/sources` — **образец, не сверенная редакция**. Реальный корпус
+  (официальный текст с pravo.gov.ru + реквизиты редакции) подключается тем же контрактом.
+- Каждый ML-компонент pluggable: реальная реализация на GPU/API + детерминированный
+  офлайн-fallback. Поэтому тесты и демо не требуют скачивания моделей.
