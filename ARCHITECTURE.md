@@ -22,7 +22,7 @@ flowchart TD
     VERIFY -->|не подтверждено| ORCH
     VERIFY -->|подтверждено| ANS[Ответ + кликабельные ссылки<br/>+ флаг уверенности]
 
-    subgraph Ingestion (офлайн)
+    subgraph ingestion["Ingestion (офлайн)"]
       SRC[pravo.gov.ru<br/>кодексы, ФЗ] --> NORM[Нормализация +<br/>парсинг структуры]
       NORM --> CHUNK[Легал-aware чанкинг<br/>статья/пункт/абзац]
       CHUNK --> EMB[Эмбеддинги]
