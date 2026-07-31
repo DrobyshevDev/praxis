@@ -6,9 +6,14 @@
 
 from __future__ import annotations
 
+import math
 from collections.abc import Sequence
 
 from ..core.models import RetrievedProvision
+
+
+def _sigmoid(x: float) -> float:
+    return 1.0 / (1.0 + math.exp(-x))
 
 
 class BGEReranker:
@@ -43,7 +48,9 @@ class BGEReranker:
         ]
         scores = model.predict(pairs)
         ranked = sorted(zip(candidates, scores), key=lambda x: x[1], reverse=True)
+        # Логиты cross-encoder → 0..1 через sigmoid, чтобы скор был калиброванной
+        # оценкой релевантности (используется как уверенность экстрактивного ответа).
         return [
-            RetrievedProvision(c.provision, score=float(s), method="rerank")
+            RetrievedProvision(c.provision, score=_sigmoid(float(s)), method="rerank")
             for c, s in ranked[:top_k]
         ]

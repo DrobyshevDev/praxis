@@ -11,7 +11,9 @@ def test_pipeline_answers_with_grounded_citations():
     assert any(c.provision.article_number == "450" for c in answer.citations)
     assert 0.0 <= answer.confidence <= 1.0
     assert answer.steps  # трейс рассуждения заполнен
-    assert answer.verified
+    # Экстрактивный ответ: entailment-вердиктов нет (норма и есть ответ), а трейс
+    # сообщает о найденных нормах.
+    assert any("Найдено применимых норм" in s for s in answer.steps)
 
 
 def test_pipeline_low_confidence_on_offtopic():

@@ -99,23 +99,14 @@ class SelfRAG:
             total = len(verified) + len(unverified)
             answer.confidence = round(len(verified) / total, 3) if total else 0.0
         else:
-            # Оцениваем релевантность каждой нормы вопросу, отбрасываем шум и
-            # оставляем хотя бы самую релевантную. Уверенность — по лучшей норме.
-            scored = sorted(
-                (
-                    (r, self.verifier.verify(question, Citation(r.provision)))
-                    for r in provisions
-                ),
-                key=lambda pair: pair[1].score,
-                reverse=True,
-            )
-            # Отсекаем шум по порогу релевантности и ограничиваем число норм в ответе
-            # (scored уже отсортирован по убыванию скора); иначе — самую релевантную.
-            kept = [(r, vc) for r, vc in scored if vc.score >= cfg.relevance_floor]
-            kept = kept[: cfg.max_citations] or scored[:1]
-            answer = self.answerer.answer(question, [r for r, _ in kept])
-            answer.verified = [vc for _, vc in kept]
-            answer.confidence = round(max(vc.score for _, vc in kept), 3)
+            # Релевантность и уверенность — по реранкеру (семантика). NLI-верификатор —
+            # инструмент проверки ТЕЗИСОВ, а не вопроса; на экстрактивном ответе (норма и
+            # есть ответ) entailment-вердикт не применяется, verified остаётся пустым.
+            # provisions уже отранжированы по скору реранкера (0..1).
+            kept = [r for r in provisions if r.score >= cfg.relevance_floor]
+            kept = kept[: cfg.max_citations] or provisions[:1]
+            answer = self.answerer.answer(question, kept)
+            answer.confidence = round(min(1.0, max(0.0, kept[0].score)), 3) if kept else 0.0
 
         # Подсвечиваем в каждой норме фразу, релевантную вопросу (span-level).
         answer.citations = [
@@ -129,11 +120,17 @@ class SelfRAG:
                 [c.provision.article_number for c in answer.citations], self.case_index
             )
 
-        supported = sum(1 for vc in answer.verified if vc.verdict == Verdict.SUPPORTS)
-        answer.steps = steps + [
-            f"Проверка цитат: норм в ответе {len(answer.citations)}, "
-            f"подтверждают вопрос {supported}, без опоры {len(answer.unverified_claims)}."
-        ]
+        if getattr(self.answerer, "synthesizes", False):
+            supported = sum(1 for vc in answer.verified if vc.verdict == Verdict.SUPPORTS)
+            answer.steps = steps + [
+                f"Проверка тезисов: подтверждено нормой {supported}, "
+                f"без опоры {len(answer.unverified_claims)}."
+            ]
+        else:
+            answer.steps = steps + [
+                f"Найдено применимых норм: {len(answer.citations)} "
+                f"(релевантность {answer.confidence:.0%})."
+            ]
         return answer
 
     def _reformulate(self, question: str, cands) -> str:
