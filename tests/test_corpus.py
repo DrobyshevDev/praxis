@@ -41,3 +41,10 @@ def test_default_corpus_without_env():
     # без PRAXIS_CORPUS_DIR — образец ГК
     provisions = load_sample_provisions()
     assert any(p.act.short_title == "ГК РФ" for p in provisions)
+
+
+def test_load_corpus_dir_skips_practice(tmp_path):
+    _write_act(tmp_path)
+    (tmp_path / "practice.json").write_text('[{"id": "x"}]', encoding="utf-8")
+    acts = load_corpus_dir(tmp_path)
+    assert len(acts) == 1  # practice.json не грузится как акт
