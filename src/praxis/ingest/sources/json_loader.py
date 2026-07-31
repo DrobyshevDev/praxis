@@ -45,3 +45,25 @@ def act_from_dict(data: dict) -> RawAct:
 def load_act_json(path: str | Path) -> RawAct:
     with open(path, encoding="utf-8") as f:
         return act_from_dict(json.load(f))
+
+
+def act_to_dict(raw: RawAct) -> dict:
+    """Обратное к act_from_dict — сериализация акта в JSON-совместимый dict."""
+    articles = []
+    for a in raw.articles:
+        item: dict = {"number": a.number, "title": a.title}
+        if a.points:
+            item["points"] = [list(p) for p in a.points]
+        else:
+            item["text"] = a.text
+        articles.append(item)
+    return {
+        "id": raw.id,
+        "kind": raw.kind.value,
+        "title": raw.title,
+        "short_title": raw.short_title,
+        "number": raw.number,
+        "date": raw.date,
+        "edition": raw.edition,
+        "articles": articles,
+    }
