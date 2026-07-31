@@ -1,0 +1,2 @@
+mlango
+# praxis подхватывается из ../../src (mlango_eval/settings.py добавляет путь)

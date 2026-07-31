@@ -114,8 +114,9 @@ BGE-M3, реранкер bge-reranker-v2-m3. Проверка цитат: NLI н
 провайдера: Claude для синтеза, RU-провайдеры (GigaChat, YandexGPT) для сценариев с
 требованием резидентности.
 
-Проект переиспользует библиотеки автора (DenisDrobyshev): glia для прозрачного агентного цикла и mlango
-для serving и мониторинга качества.
+Проект использует библиотеки автора (DenisDrobyshev): glia — агентный цикл в LLM-режиме
+(поиск оформлен как glia-инструмент, трейс из trajectory); mlango — трекаемый golden-eval
+через его подсистему evals (`integrations/mlango_eval`, `manage.py evaluate`).
 
 Архитектура — [ARCHITECTURE.md](ARCHITECTURE.md).
 
