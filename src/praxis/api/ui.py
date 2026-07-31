@@ -1,4 +1,4 @@
-"""Минимальный веб-UI (одна страница, self-contained) для /ask."""
+"""Минимальный веб-UI (одна страница, self-contained) для /v1/ask."""
 
 from __future__ import annotations
 
@@ -23,7 +23,12 @@ input { flex:1; padding:12px 14px; border:1px solid var(--border); border-radius
 button { padding:12px 18px; border:0; border-radius:10px; background:var(--accent);
   color:#fff; font-size:16px; font-weight:600; cursor:pointer; }
 button:disabled { opacity:.6; cursor:default; }
-.hint { color:var(--muted); font-size:13px; margin-bottom:20px; }
+.hint { color:var(--muted); font-size:13px; margin-bottom:14px; }
+.hist { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:20px; }
+.chip { font-size:12px; color:var(--muted); background:var(--card); border:1px solid var(--border);
+  border-radius:20px; padding:4px 11px; cursor:pointer; max-width:100%;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.chip:hover { color:var(--fg); border-color:var(--accent); }
 .answer { white-space:pre-wrap; background:var(--card); border:1px solid var(--border);
   border-radius:12px; padding:16px 18px; margin-top:16px; }
 .conf { display:flex; align-items:center; gap:10px; margin:18px 0 4px; font-size:14px; color:var(--muted); }
@@ -34,11 +39,16 @@ button:disabled { opacity:.6; cursor:default; }
 .src .cit { font-weight:600; } .src .mark { margin-right:6px; }
 .mark.ok { color:var(--good); } .mark.q { color:var(--muted); } .mark.no { color:#c0392b; }
 .src .txt { color:var(--fg); font-size:14px; margin-top:4px; }
+.copy { float:right; font-size:11px; font-weight:400; color:var(--muted); background:none;
+  border:1px solid var(--border); border-radius:6px; padding:1px 8px; cursor:pointer; }
+.copy:hover { color:var(--fg); }
 mark { background:rgba(45,108,223,.22); color:inherit; border-radius:3px; padding:0 2px; }
 .warn { color:var(--warn); font-size:14px; margin-top:14px; }
 details { margin-top:20px; color:var(--muted); font-size:13px; }
 details pre { white-space:pre-wrap; }
 .foot { margin-top:28px; color:var(--muted); font-size:12px; }
+@media (max-width:600px) { .wrap { padding:24px 14px 60px; } form { flex-direction:column; }
+  button { width:100%; } h1 { font-size:22px; } }
 </style>
 </head>
 <body>
@@ -50,26 +60,29 @@ details pre { white-space:pre-wrap; }
     <button id="b" type="button">Спросить</button>
   </form>
   <div class="hint">Демо-корпус кодексов РФ. Не является юридической консультацией.</div>
+  <div id="hist" class="hist"></div>
   <div id="out"></div>
   <div class="foot">Каждый ответ проходит проверку цитат: ✓ — норма подтверждает, ? — релевантна, ✗ — противоречит.</div>
 </div>
 <script>
-const f=document.getElementById('f'), q=document.getElementById('q'),
-      b=document.getElementById('b'), out=document.getElementById('out');
+const q=document.getElementById('q'), b=document.getElementById('b'),
+      out=document.getElementById('out'), hist=document.getElementById('hist');
 const MARK={"подтверждает":["ok","✓"],"не относится":["q","?"],"противоречит":["no","✗"]};
+
 async function ask(){
   const question=q.value.trim(); if(!question) return;
-  b.disabled=true; b.textContent='...'; out.innerHTML='';
+  b.disabled=true; b.textContent='...'; out.innerHTML='<div class="conf">Ищу в законе…</div>';
   try{
     const r=await fetch('/v1/ask',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({question})});
     const a=await r.json();
-    render(a);
-  }catch(err){ out.innerHTML='<div class="warn">Ошибка запроса</div>'; }
+    render(a); saveHist(question); renderHist();
+  }catch(err){ out.innerHTML='<div class="warn">Ошибка запроса. Проверьте, что сервер запущен.</div>'; }
   b.disabled=false; b.textContent='Спросить';
 }
 b.addEventListener('click', ask);
 q.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); ask(); }});
+
 function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
 function hl(text,span){
   if(!span||span.length!==2) return esc(text);
@@ -77,15 +90,32 @@ function hl(text,span){
   if(s<0||e>text.length||s>=e) return esc(text);
   return esc(text.slice(0,s))+'<mark>'+esc(text.slice(s,e))+'</mark>'+esc(text.slice(e));
 }
+function saveHist(query){
+  let h=JSON.parse(localStorage.getItem('praxis_hist')||'[]');
+  h=[query,...h.filter(x=>x!==query)].slice(0,8);
+  localStorage.setItem('praxis_hist',JSON.stringify(h));
+}
+function renderHist(){
+  const h=JSON.parse(localStorage.getItem('praxis_hist')||'[]');
+  hist.innerHTML=h.map(x=>`<span class="chip" title="${esc(x)}">${esc(x)}</span>`).join('');
+  hist.querySelectorAll('.chip').forEach((el,i)=>el.onclick=()=>{q.value=h[i];ask();});
+}
+function copyCite(btn,txt){
+  navigator.clipboard.writeText(txt).then(()=>{
+    btn.textContent='скопировано'; setTimeout(()=>btn.textContent='копировать',1200);
+  });
+}
 function render(a){
   const pct=Math.round((a.confidence||0)*100);
   let h=`<div class="conf">Уверенность: ${pct}%<div class="bar"><i style="width:${pct}%"></i></div></div>`;
   h+=`<div class="answer">${esc(a.text)}</div>`;
+  const cites=[];
   if(a.citations&&a.citations.length){
     h+='<div class="sources">';
     for(const c of a.citations){
-      const m=MARK[c.verdict]||["q"," "];
-      h+=`<div class="src"><div class="cit"><span class="mark ${m[0]}">${m[1]}</span>${esc(c.citation)} — ${esc(c.article_title)}</div><div class="txt">${hl(c.text,c.span)}</div></div>`;
+      const m=MARK[c.verdict]||["q"," "]; const i=cites.length;
+      cites.push(c.citation+' — '+c.article_title+'\\n'+c.text);
+      h+=`<div class="src"><div class="cit"><button class="copy" data-c="${i}">копировать</button><span class="mark ${m[0]}">${m[1]}</span>${esc(c.citation)} — ${esc(c.article_title)}</div><div class="txt">${hl(c.text,c.span)}</div></div>`;
     }
     h+='</div>';
   }
@@ -103,7 +133,9 @@ function render(a){
     h+='<details><summary>Ход рассуждения</summary><pre>'+a.steps.map(esc).join('\\n')+'</pre></details>';
   }
   out.innerHTML=h;
+  out.querySelectorAll('.copy').forEach(el=>el.onclick=()=>copyCite(el, cites[+el.dataset.c]));
 }
+renderHist();
 </script>
 </body>
 </html>"""
