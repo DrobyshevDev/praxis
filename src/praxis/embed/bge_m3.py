@@ -25,12 +25,18 @@ class BGEM3Embedder:
 
             device = self._device or ("cuda" if torch.cuda.is_available() else "cpu")
             self._model = SentenceTransformer(self._model_name, device=device)
+            # Обрезаем длину: у норм бывают длинные тексты, attention O(L^2) на GPU
+            # с малой памятью (8 ГБ) иначе даёт OOM на большом корпусе.
+            self._model.max_seq_length = 512
         return self._model
 
     def embed(self, texts: Sequence[str]) -> list[list[float]]:
         model = self._ensure()
         vectors = model.encode(
-            list(texts), normalize_embeddings=True, convert_to_numpy=True
+            list(texts),
+            normalize_embeddings=True,
+            convert_to_numpy=True,
+            batch_size=16,
         )
         return [row.tolist() for row in vectors]
 

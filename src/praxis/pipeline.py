@@ -30,7 +30,8 @@ def build_pipeline(
     use_dense: bool = True,
     use_graph: bool = True,
     use_cases: bool = True,
-) -> SelfRAG:
+    use_glia: bool = True,
+):
     corpus = load_sample_provisions() if provisions is None else list(provisions)
 
     bm25 = BM25Retriever(corpus)
@@ -42,6 +43,18 @@ def build_pipeline(
 
     if use_graph:
         retriever = GraphExpandingRetriever(retriever, corpus)
+
+    # LLM-режим на glia: если есть провайдер (ключ) и установлена glia — агентный путь.
+    if use_glia:
+        from .llm import default_glia_llm
+
+        glia_llm = default_glia_llm()
+        if glia_llm is not None:
+            from .agent.glia_agent import GliaLegalAgent
+
+            return GliaLegalAgent(
+                glia_llm, retriever, default_verifier(), reranker=default_reranker()
+            )
 
     return SelfRAG(
         retriever=retriever,
