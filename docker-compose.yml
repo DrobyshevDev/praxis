@@ -1,0 +1,22 @@
+# Postgres + pgvector для реального индекса (v1). Порт 5434, чтобы не конфликтовать
+# с ARC (5433). BM25-срез v0 работает без БД — этот стек нужен для dense/hybrid.
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: praxis
+      POSTGRES_PASSWORD: praxis
+      POSTGRES_DB: praxis
+    ports:
+      - "5434:5432"
+    volumes:
+      - praxis_pg:/var/lib/postgresql/data
+      - ./src/praxis/index/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U praxis"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  praxis_pg:
