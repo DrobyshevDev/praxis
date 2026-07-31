@@ -47,7 +47,7 @@ details pre { white-space:pre-wrap; }
   <div class="tag">Юридический ассистент по праву РФ · ответы с проверяемыми ссылками на нормы</div>
   <form id="f">
     <input id="q" placeholder="Например: можно ли расторгнуть договор через суд?" autocomplete="off">
-    <button id="b" type="submit">Спросить</button>
+    <button id="b" type="button">Спросить</button>
   </form>
   <div class="hint">Демо на образце корпуса ГК РФ ч.1. Не является юридической консультацией.</div>
   <div id="out"></div>
@@ -57,8 +57,7 @@ details pre { white-space:pre-wrap; }
 const f=document.getElementById('f'), q=document.getElementById('q'),
       b=document.getElementById('b'), out=document.getElementById('out');
 const MARK={"подтверждает":["ok","✓"],"не относится":["q","?"],"противоречит":["no","✗"]};
-f.addEventListener('submit', async(e)=>{
-  e.preventDefault();
+async function ask(){
   const question=q.value.trim(); if(!question) return;
   b.disabled=true; b.textContent='...'; out.innerHTML='';
   try{
@@ -68,7 +67,9 @@ f.addEventListener('submit', async(e)=>{
     render(a);
   }catch(err){ out.innerHTML='<div class="warn">Ошибка запроса</div>'; }
   b.disabled=false; b.textContent='Спросить';
-});
+}
+b.addEventListener('click', ask);
+q.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); ask(); }});
 function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
 function hl(text,span){
   if(!span||span.length!==2) return esc(text);
