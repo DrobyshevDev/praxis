@@ -88,6 +88,13 @@ function render(a){
     }
     h+='</div>';
   }
+  if(a.related_cases&&a.related_cases.length){
+    h+='<div class="sources"><div style="color:var(--muted);font-size:13px;margin:8px 0 4px">Судебная практика по этим нормам (образец):</div>';
+    for(const c of a.related_cases){
+      h+=`<div class="src"><div class="cit">${esc(c.citation)}</div><div class="txt">${esc(c.summary)}</div></div>`;
+    }
+    h+='</div>';
+  }
   if(a.unverified_claims&&a.unverified_claims.length){
     h+='<div class="warn">⚠ Без опоры на норму (не считать фактом): '+a.unverified_claims.map(esc).join('; ')+'</div>';
   }

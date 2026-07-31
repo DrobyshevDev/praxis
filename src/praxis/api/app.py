@@ -12,7 +12,14 @@ from fastapi.responses import HTMLResponse
 
 from ..config import config_from_env
 from ..pipeline import build_pipeline
-from .schemas import AnswerOut, AskRequest, CitationOut, SearchHit, SearchRequest
+from .schemas import (
+    AnswerOut,
+    AskRequest,
+    CaseOut,
+    CitationOut,
+    SearchHit,
+    SearchRequest,
+)
 from .ui import INDEX_HTML
 
 app = FastAPI(
@@ -59,6 +66,17 @@ def ask(req: AskRequest) -> AnswerOut:
         )
         for c in answer.citations
     ]
+    cases = [
+        CaseOut(
+            citation=case.citation,
+            court=case.court,
+            number=case.number,
+            date=case.date,
+            summary=case.summary,
+            cited_articles=sorted(case.cited_articles),
+        )
+        for case in answer.related_cases
+    ]
     return AnswerOut(
         question=answer.question,
         text=answer.text,
@@ -66,6 +84,7 @@ def ask(req: AskRequest) -> AnswerOut:
         citations=citations,
         unverified_claims=answer.unverified_claims,
         steps=answer.steps,
+        related_cases=cases,
     )
 
 

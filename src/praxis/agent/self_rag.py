@@ -15,7 +15,8 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
-from ..core.models import Answer, Citation, Verdict
+from ..cases.index import build_case_index, related_cases
+from ..core.models import Answer, CaseDecision, Citation, Verdict
 from ..generate.base import Answerer
 from ..retrieve.base import Reranker, Retriever
 from ..span import find_support_span
@@ -43,12 +44,14 @@ class SelfRAG:
         answerer: Answerer,
         reranker: Reranker | None = None,
         config: SelfRAGConfig | None = None,
+        cases: list[CaseDecision] | None = None,
     ) -> None:
         self.retriever = retriever
         self.verifier = verifier
         self.answerer = answerer
         self.reranker = reranker
         self.config = config or SelfRAGConfig()
+        self.case_index = build_case_index(cases) if cases else {}
 
     def answer(self, question: str) -> Answer:
         cfg = self.config
@@ -119,6 +122,12 @@ class SelfRAG:
             Citation(c.provision, span=find_support_span(question, c.provision.text))
             for c in answer.citations
         ]
+
+        # Судебная практика по процитированным нормам (граф «норма → дело»).
+        if self.case_index:
+            answer.related_cases = related_cases(
+                [c.provision.article_number for c in answer.citations], self.case_index
+            )
 
         supported = sum(1 for vc in answer.verified if vc.verdict == Verdict.SUPPORTS)
         answer.steps = steps + [

@@ -24,6 +24,15 @@ class CitationOut(BaseModel):
     span: list[int] | None = None  # [start, end) подтверждающего фрагмента в text
 
 
+class CaseOut(BaseModel):
+    citation: str
+    court: str
+    number: str
+    date: str
+    summary: str
+    cited_articles: list[str]
+
+
 class AnswerOut(BaseModel):
     question: str
     text: str
@@ -31,6 +40,7 @@ class AnswerOut(BaseModel):
     citations: list[CitationOut]
     unverified_claims: list[str]
     steps: list[str]
+    related_cases: list[CaseOut] = []
 
 
 class SearchHit(BaseModel):

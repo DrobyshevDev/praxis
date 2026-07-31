@@ -11,9 +11,19 @@ from .statute_parser import parse_statute_text
 
 
 def load_sample_provisions() -> list[Provision]:
-    """Загружает образец корпуса (v0) в плоский список цитируемых норм."""
+    """Нормы корпуса. Если задан PRAXIS_CORPUS_DIR — грузим оттуда, иначе образец."""
+    import os
+
+    corpus_dir = os.environ.get("PRAXIS_CORPUS_DIR")
+    if corpus_dir:
+        from .corpus import load_corpus_dir
+
+        acts = load_corpus_dir(corpus_dir)
+    else:
+        acts = SAMPLE_ACTS
+
     provisions: list[Provision] = []
-    for raw in SAMPLE_ACTS:
+    for raw in acts:
         provisions.extend(build_provisions(raw))
     return provisions
 

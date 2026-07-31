@@ -41,6 +41,12 @@ def main() -> None:
         for claim in answer.unverified_claims:
             print(f"   • {claim}")
 
+    if answer.related_cases:
+        print("\n  СУДЕБНАЯ ПРАКТИКА (образец):")
+        for case in answer.related_cases:
+            print(f"   • {case.citation}")
+            print(f"     {case.summary}")
+
     print("\n  ХОД РАССУЖДЕНИЯ:")
     for step in answer.steps:
         print(f"   → {step}")

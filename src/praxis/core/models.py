@@ -99,6 +99,22 @@ class VerifiedClaim:
     score: float
 
 
+@dataclass(frozen=True)
+class CaseDecision:
+    """Судебный акт, ссылающийся на нормы (для графа «норма ↔ дело»)."""
+
+    id: str
+    court: str
+    number: str
+    date: str
+    summary: str
+    cited_articles: frozenset[str] = field(default_factory=frozenset)
+
+    @property
+    def citation(self) -> str:
+        return f"{self.court}, дело {self.number} от {self.date}"
+
+
 @dataclass
 class Answer:
     """Итоговый ответ: только проверенные тезисы попадают в text как факты."""
@@ -110,3 +126,4 @@ class Answer:
     unverified_claims: list[str] = field(default_factory=list)
     confidence: float = 0.0
     steps: list[str] = field(default_factory=list)  # трейс self-RAG (glass-box)
+    related_cases: list[CaseDecision] = field(default_factory=list)

@@ -10,6 +10,7 @@ from __future__ import annotations
 from collections.abc import Iterable
 
 from .agent.self_rag import SelfRAG, SelfRAGConfig
+from .cases import SAMPLE_CASES
 from .core.models import Provision
 from .embed import default_embedder
 from .generate import default_answerer
@@ -28,6 +29,7 @@ def build_pipeline(
     config: SelfRAGConfig | None = None,
     use_dense: bool = True,
     use_graph: bool = True,
+    use_cases: bool = True,
 ) -> SelfRAG:
     corpus = load_sample_provisions() if provisions is None else list(provisions)
 
@@ -47,4 +49,5 @@ def build_pipeline(
         answerer=default_answerer(),
         reranker=default_reranker(),
         config=config,
+        cases=SAMPLE_CASES if use_cases else None,
     )
