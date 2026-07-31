@@ -1,4 +1,5 @@
 from praxis.eval import run_eval
+from praxis.eval.golden import GOLDEN
 from praxis.eval.metrics import citation_precision, mrr, recall_at_k
 from praxis.eval.report import render_html
 
@@ -14,7 +15,7 @@ def test_metric_functions():
 
 def test_run_eval_produces_report():
     report = run_eval()
-    assert report.n == 12
+    assert report.n == len(GOLDEN)
     assert set(report.aggregate) >= {"recall@5", "mrr", "citation_precision", "hit_rate"}
     # На образце корпуса ретривер должен находить релевантную статью в большинстве кейсов.
     assert report.aggregate["recall@5"] >= 0.7

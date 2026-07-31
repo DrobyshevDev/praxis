@@ -55,6 +55,7 @@ def ask(req: AskRequest) -> AnswerOut:
             article_title=c.provision.article_title,
             text=c.provision.text,
             verdict=verdict_by_id.get(c.provision.id),
+            span=list(c.span) if c.span else None,
         )
         for c in answer.citations
     ]

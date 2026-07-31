@@ -34,6 +34,7 @@ button:disabled { opacity:.6; cursor:default; }
 .src .cit { font-weight:600; } .src .mark { margin-right:6px; }
 .mark.ok { color:var(--good); } .mark.q { color:var(--muted); } .mark.no { color:#c0392b; }
 .src .txt { color:var(--fg); font-size:14px; margin-top:4px; }
+mark { background:rgba(45,108,223,.22); color:inherit; border-radius:3px; padding:0 2px; }
 .warn { color:var(--warn); font-size:14px; margin-top:14px; }
 details { margin-top:20px; color:var(--muted); font-size:13px; }
 details pre { white-space:pre-wrap; }
@@ -69,6 +70,12 @@ f.addEventListener('submit', async(e)=>{
   b.disabled=false; b.textContent='Спросить';
 });
 function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+function hl(text,span){
+  if(!span||span.length!==2) return esc(text);
+  const [s,e]=span;
+  if(s<0||e>text.length||s>=e) return esc(text);
+  return esc(text.slice(0,s))+'<mark>'+esc(text.slice(s,e))+'</mark>'+esc(text.slice(e));
+}
 function render(a){
   const pct=Math.round((a.confidence||0)*100);
   let h=`<div class="conf">Уверенность: ${pct}%<div class="bar"><i style="width:${pct}%"></i></div></div>`;
@@ -77,7 +84,7 @@ function render(a){
     h+='<div class="sources">';
     for(const c of a.citations){
       const m=MARK[c.verdict]||["q"," "];
-      h+=`<div class="src"><div class="cit"><span class="mark ${m[0]}">${m[1]}</span>${esc(c.citation)} — ${esc(c.article_title)}</div><div class="txt">${esc(c.text)}</div></div>`;
+      h+=`<div class="src"><div class="cit"><span class="mark ${m[0]}">${m[1]}</span>${esc(c.citation)} — ${esc(c.article_title)}</div><div class="txt">${hl(c.text,c.span)}</div></div>`;
     }
     h+='</div>';
   }

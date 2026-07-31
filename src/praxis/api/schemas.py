@@ -21,6 +21,7 @@ class CitationOut(BaseModel):
     article_title: str
     text: str
     verdict: str | None = None
+    span: list[int] | None = None  # [start, end) подтверждающего фрагмента в text
 
 
 class AnswerOut(BaseModel):

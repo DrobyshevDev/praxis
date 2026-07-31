@@ -18,6 +18,7 @@ from dataclasses import dataclass
 from ..core.models import Answer, Citation, Verdict
 from ..generate.base import Answerer
 from ..retrieve.base import Reranker, Retriever
+from ..span import find_support_span
 from ..verify.base import CitationVerifier
 
 _SENTENCE_RE = re.compile(r"(?<=[.!?])\s+")
@@ -112,6 +113,12 @@ class SelfRAG:
             answer = self.answerer.answer(question, [r for r, _ in kept])
             answer.verified = [vc for _, vc in kept]
             answer.confidence = round(max(vc.score for _, vc in kept), 3)
+
+        # Подсвечиваем в каждой норме фразу, релевантную вопросу (span-level).
+        answer.citations = [
+            Citation(c.provision, span=find_support_span(question, c.provision.text))
+            for c in answer.citations
+        ]
 
         supported = sum(1 for vc in answer.verified if vc.verdict == Verdict.SUPPORTS)
         answer.steps = steps + [
