@@ -30,7 +30,8 @@ class SelfRAGConfig:
     answer_top_k: int = 5
     max_rounds: int = 2
     sufficiency_score: float = 0.35  # ниже — делаем доп-раунд с переформулировкой
-    relevance_floor: float = 0.15  # нормы слабее — отбрасываем из ответа как шум
+    relevance_floor: float = 0.15  # абсолютный минимум релевантности нормы
+    keep_ratio: float = 0.6  # держим нормы со скором >= keep_ratio * лучший (шкало-независимо)
 
 
 class SelfRAG:
@@ -104,8 +105,11 @@ class SelfRAG:
                 key=lambda pair: pair[1].score,
                 reverse=True,
             )
-            kept = [(r, vc) for r, vc in scored if vc.score >= cfg.relevance_floor]
-            kept = kept or scored[:1]
+            # Относительный порог (шкало-независимо для эвристики и NLI): держим нормы
+            # со скором не ниже доли от лучшего; иначе — хотя бы самую релевантную.
+            top_score = scored[0][1].score
+            threshold = max(cfg.relevance_floor, top_score * cfg.keep_ratio)
+            kept = [(r, vc) for r, vc in scored if vc.score >= threshold] or scored[:1]
             answer = self.answerer.answer(question, [r for r, _ in kept])
             answer.verified = [vc for _, vc in kept]
             answer.confidence = round(max(vc.score for _, vc in kept), 3)

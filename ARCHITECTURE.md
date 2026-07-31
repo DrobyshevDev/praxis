@@ -91,15 +91,21 @@ praxis/
 ├── pyproject.toml
 ├── docker-compose.yml
 ├── src/praxis/
-│   ├── ingest/         # источники, нормализация, чанкинг, версии
-│   ├── index/          # pgvector + FTS, схема, миграции
-│   ├── retrieve/       # hybrid + fusion + rerank
-│   ├── agent/          # self-RAG луп на glia
-│   ├── verify/         # Citation Verifier (NLI)
-│   ├── generate/       # провайдеры LLM, сборка ответа со span-цитатами
-│   ├── eval/           # RAGAS + legal-метрики, golden set
-│   ├── api/            # FastAPI
-│   └── core/           # доменные модели: Акт/Статья/Пункт/Цитата/Ответ
+│   ├── ingest/         # источники, statute_parser, json_loader, чанкинг
+│   ├── index/          # pgvector + FTS, схема
+│   ├── embed/          # BGE-M3 + hashing fallback
+│   ├── retrieve/       # BM25 + dense + hybrid RRF
+│   ├── rerank/         # cross-encoder BGE + лексический fallback
+│   ├── graph/          # GraphRAG по перекрёстным ссылкам норм
+│   ├── verify/         # Citation Verifier: NLI + эвристика
+│   ├── llm/            # Claude + Mock
+│   ├── generate/       # экстрактивный / LLM генератор со span-цитатами
+│   ├── agent/          # self-RAG луп (трейс)
+│   ├── eval/           # golden set, метрики, HTML-дашборд
+│   ├── api/            # FastAPI + веб-UI
+│   ├── pipeline.py     # build_pipeline(): фабрика real/fallback
+│   ├── runtime.py      # PRAXIS_OFFLINE переключатель
+│   └── core/           # доменные модели: Акт/Статья/Норма/Цитата/Ответ
 ├── web/                # минимальный UI (позже)
 └── tests/
 ```
