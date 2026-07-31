@@ -8,6 +8,10 @@ __all__ = ["Embedder", "HashingEmbedder"]
 
 def default_embedder() -> Embedder:
     """BGE-M3, если доступны ML-зависимости; иначе детерминированный hashing."""
+    from ..runtime import is_offline
+
+    if is_offline():
+        return HashingEmbedder()
     try:
         import sentence_transformers  # noqa: F401
         import torch  # noqa: F401

@@ -16,7 +16,9 @@ def default_llm() -> LLMClient | None:
     None означает «работаем без LLM» — генератор откатывается на экстрактивный
     (дословные цитаты, ноль галлюцинаций).
     """
-    if not os.environ.get("ANTHROPIC_API_KEY"):
+    from ..runtime import is_offline
+
+    if is_offline() or not os.environ.get("ANTHROPIC_API_KEY"):
         return None
     try:
         from .anthropic_client import AnthropicClient

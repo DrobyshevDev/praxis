@@ -13,6 +13,10 @@ __all__ = ["CitationVerifier", "HeuristicVerifier", "default_verifier"]
 
 def default_verifier() -> CitationVerifier:
     """NLI-модель, если доступны ML-зависимости; иначе эвристика."""
+    from ..runtime import is_offline
+
+    if is_offline():
+        return HeuristicVerifier()
     try:
         import torch  # noqa: F401
         import transformers  # noqa: F401

@@ -6,6 +6,8 @@ from ..core.models import Provision
 from .chunker import build_provisions
 from .schema import RawAct, RawArticle
 from .sources import SAMPLE_ACTS
+from .sources.json_loader import act_from_dict, load_act_json
+from .statute_parser import parse_statute_text
 
 
 def load_sample_provisions() -> list[Provision]:
@@ -19,6 +21,9 @@ def load_sample_provisions() -> list[Provision]:
 __all__ = [
     "RawAct",
     "RawArticle",
+    "act_from_dict",
     "build_provisions",
+    "load_act_json",
     "load_sample_provisions",
+    "parse_statute_text",
 ]
