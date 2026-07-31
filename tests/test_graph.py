@@ -13,9 +13,10 @@ def test_extract_references():
 
 def test_build_graph_has_expected_edges():
     graph = build_reference_graph(load_sample_provisions())
-    assert "422" in graph.get("421", set())  # ст.421 п.4 → (статья 422)
-    assert "15" in graph.get("393", set())   # ст.393 п.2 → статьёй 15
-    assert "450" in graph.get("452", set())  # ст.452 п.2 → статьёй 450
+    a = "gk-rf-1"  # id образца
+    assert (a, "422") in graph.get((a, "421"), set())  # ст.421 п.4 → (статья 422)
+    assert (a, "15") in graph.get((a, "393"), set())   # ст.393 п.2 → статьёй 15
+    assert (a, "450") in graph.get((a, "452"), set())  # ст.452 п.2 → статьёй 450
 
 
 class _FakeBase:

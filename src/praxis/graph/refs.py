@@ -24,11 +24,18 @@ def extract_references(text: str) -> set[str]:
     return refs
 
 
-def build_reference_graph(provisions: Iterable[Provision]) -> dict[str, set[str]]:
-    """Граф на уровне статей: article_number → множество упомянутых article_number."""
-    graph: dict[str, set[str]] = defaultdict(set)
+def build_reference_graph(
+    provisions: Iterable[Provision],
+) -> dict[tuple[str, str], set[tuple[str, str]]]:
+    """Граф ссылок с привязкой к акту: (act_id, статья) → {(act_id, упомянутая статья)}.
+
+    Ключ включает акт, иначе при нескольких кодексах «статья 15» в ГК ошибочно
+    связалась бы со ст. 15 ТК. Ссылки считаем внутри того же акта («настоящего Кодекса»).
+    """
+    graph: dict[tuple[str, str], set[tuple[str, str]]] = defaultdict(set)
     for p in provisions:
+        key = (p.act.id, p.article_number)
         for ref in extract_references(p.text):
             if ref != p.article_number:
-                graph[p.article_number].add(ref)
+                graph[key].add((p.act.id, ref))
     return dict(graph)

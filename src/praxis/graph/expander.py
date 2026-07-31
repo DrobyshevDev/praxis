@@ -31,9 +31,9 @@ class GraphExpandingRetriever:
     ) -> None:
         self.base = base
         provisions = list(provisions)
-        self.by_article: dict[str, list[Provision]] = defaultdict(list)
+        self.by_article: dict[tuple[str, str], list[Provision]] = defaultdict(list)
         for p in provisions:
-            self.by_article[p.article_number].append(p)
+            self.by_article[(p.act.id, p.article_number)].append(p)
         self.graph = graph if graph is not None else build_reference_graph(provisions)
         self.hops = hops
         self.expand_from = expand_from
@@ -44,18 +44,21 @@ class GraphExpandingRetriever:
         seen = {h.provision.id for h in hits}
         extra: list[RetrievedProvision] = []
 
-        frontier = [(h.provision.article_number, h.score) for h in hits[: self.expand_from]]
+        frontier = [
+            ((h.provision.act.id, h.provision.article_number), h.score)
+            for h in hits[: self.expand_from]
+        ]
         for _ in range(self.hops):
-            next_frontier: list[tuple[str, float]] = []
-            for article, score in frontier:
-                for ref in self.graph.get(article, ()):
-                    for p in self.by_article.get(ref, ()):
+            next_frontier: list[tuple[tuple[str, str], float]] = []
+            for key, score in frontier:
+                for ref_key in self.graph.get(key, ()):
+                    for p in self.by_article.get(ref_key, ()):
                         if p.id in seen:
                             continue
                         seen.add(p.id)
                         w = score * self.weight
                         extra.append(RetrievedProvision(p, score=w, method="graph"))
-                        next_frontier.append((ref, w))
+                        next_frontier.append((ref_key, w))
             frontier = next_frontier
 
         return hits + extra

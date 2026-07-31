@@ -1,4 +1,4 @@
-from praxis.agent.self_rag import SelfRAG, SelfRAGConfig
+from praxis.agent.self_rag import SelfRAGConfig
 from praxis.core.models import Answer
 from praxis.pipeline import build_pipeline
 

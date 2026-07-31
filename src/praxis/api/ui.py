@@ -49,7 +49,7 @@ details pre { white-space:pre-wrap; }
     <input id="q" placeholder="Например: можно ли расторгнуть договор через суд?" autocomplete="off">
     <button id="b" type="button">Спросить</button>
   </form>
-  <div class="hint">Демо на образце корпуса ГК РФ ч.1. Не является юридической консультацией.</div>
+  <div class="hint">Демо-корпус кодексов РФ. Не является юридической консультацией.</div>
   <div id="out"></div>
   <div class="foot">Каждый ответ проходит проверку цитат: ✓ — норма подтверждает, ? — релевантна, ✗ — противоречит.</div>
 </div>

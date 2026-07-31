@@ -41,7 +41,7 @@ def _row(case: dict, k: int) -> str:
         f"<tr><td class='q'>{q}</td>"
         f"<td><code>{relevant}</code></td>"
         f"<td><code>{html.escape(cited)}</code></td>"
-        f"<td>{case[f'recall_at_k']:.2f}</td>"
+        f"<td>{case['recall_at_k']:.2f}</td>"
         f"<td>{case['mrr']:.2f}</td>"
         f"<td>{case['citation_precision']:.2f}</td>"
         f"<td>{hit}</td>"
