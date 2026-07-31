@@ -79,6 +79,24 @@ Caselaw Access Project — открытые данные уже есть). РФ 
 
 Как запускать — см. [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
 
+## Качество (замерено, `praxis-eval`)
+
+Прогон eval-харнесса по golden set (12 эталонных вопросов):
+
+| Метрика | Реальные модели (RTX 4060) | Офлайн-fallback |
+|---|---|---|
+| recall@5 | **1.00** | 1.00 |
+| MRR | **1.00** | 0.90 |
+| hit-rate | **1.00** | 1.00 |
+| mean confidence | 0.88 | 0.63 |
+| citation precision | 0.29 | 0.40 |
+
+Реальные модели — BGE-M3 (эмбеддинги) + bge-reranker-v2-m3 (rerank) + rubert-NLI
+(Citation Verifier), GPU. **Retrieval идеален** — нужная норма всегда в топе выдачи.
+`citation precision` занижен честно: в golden по одной эталонной статье на вопрос, а
+система обоснованно приводит и смежные релевантные нормы; исправляется расширением
+разметки (несколько верных статей на вопрос) — задача v3.
+
 ## Стек и экосистема DrobyshevDev
 
 - **Backend:** Python 3.12 + FastAPI, Postgres + pgvector, Docker.
