@@ -13,6 +13,7 @@ from .agent.self_rag import SelfRAG, SelfRAGConfig
 from .core.models import Provision
 from .embed import default_embedder
 from .generate import default_answerer
+from .graph.expander import GraphExpandingRetriever
 from .ingest import load_sample_provisions
 from .rerank import default_reranker
 from .retrieve.bm25 import BM25Retriever
@@ -26,6 +27,7 @@ def build_pipeline(
     *,
     config: SelfRAGConfig | None = None,
     use_dense: bool = True,
+    use_graph: bool = True,
 ) -> SelfRAG:
     corpus = load_sample_provisions() if provisions is None else list(provisions)
 
@@ -35,6 +37,9 @@ def build_pipeline(
         retriever = HybridRetriever(bm25, dense)
     else:
         retriever = bm25
+
+    if use_graph:
+        retriever = GraphExpandingRetriever(retriever, corpus)
 
     return SelfRAG(
         retriever=retriever,

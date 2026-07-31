@@ -70,7 +70,8 @@ def ask(req: AskRequest) -> AnswerOut:
 
 @app.post("/search", response_model=list[SearchHit])
 def search(req: SearchRequest) -> list[SearchHit]:
-    hits = get_pipeline().retriever.search(req.query, top_k=req.top_k)
+    # Ретривер может расширять пул (graph-hops) сверх top_k — на выдаче режем до top_k.
+    hits = get_pipeline().retriever.search(req.query, top_k=req.top_k)[: req.top_k]
     return [
         SearchHit(
             citation=h.provision.citation,
