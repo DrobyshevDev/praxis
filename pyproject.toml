@@ -11,6 +11,7 @@ dependencies = []  # v0-срез (ingest + BM25) работает на чист�
 # Плотный поиск, reranker, NLI-верификатор — тяжёлые модели (ставятся отдельно).
 ml = [
     "sentence-transformers>=3.0",
+    "transformers>=4.40",
     "FlagEmbedding>=1.2",
     "torch>=2.2",
 ]
