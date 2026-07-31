@@ -1,7 +1,5 @@
-"""Agentic self-RAG оркестратор (v1).
+"""Agentic self-RAG оркестратор (glass-box луп, философия glia)."""
 
-Цикл `план → поиск → оценка достаточности → доп-поиск → генерация`, построенный
-на glia (glass-box agent-луп, DrobyshevDev) — прозрачно, без скрытой магии.
-Останавливается, когда набрано достаточно подтверждённых оснований, либо честно
-сообщает, что ответа в законе нет.
-"""
+from .self_rag import SelfRAG, SelfRAGConfig
+
+__all__ = ["SelfRAG", "SelfRAGConfig"]

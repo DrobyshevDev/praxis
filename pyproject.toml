@@ -23,11 +23,13 @@ api = [
     "psycopg[binary]>=3.1",
     "pgvector>=0.2",
 ]
+llm = ["anthropic>=0.40"]
 eval = ["ragas>=0.2"]
 dev = ["pytest>=8.0", "ruff>=0.4"]
 
 [project.scripts]
 praxis-demo = "praxis.demo:main"
+praxis-ask = "praxis.ask:main"
 
 [build-system]
 requires = ["hatchling"]

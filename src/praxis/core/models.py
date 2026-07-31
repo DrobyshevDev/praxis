@@ -109,3 +109,4 @@ class Answer:
     verified: list[VerifiedClaim] = field(default_factory=list)
     unverified_claims: list[str] = field(default_factory=list)
     confidence: float = 0.0
+    steps: list[str] = field(default_factory=list)  # трейс self-RAG (glass-box)
