@@ -101,18 +101,23 @@ class VerifiedClaim:
 
 @dataclass(frozen=True)
 class CaseDecision:
-    """Судебный акт, ссылающийся на нормы (для графа «норма ↔ дело»)."""
+    """Судебный акт, ссылающийся на нормы (для графа «норма ↔ дело»).
+
+    `act_id` — код, который акт толкует (ГК/УК/…); `cited_articles` — номера статей
+    этого кода. Привязка к акту нужна, чтобы «ст. 10 ГК» и «ст. 10 УК» не путались.
+    """
 
     id: str
     court: str
     number: str
     date: str
     summary: str
+    act_id: str = ""
     cited_articles: frozenset[str] = field(default_factory=frozenset)
 
     @property
     def citation(self) -> str:
-        return f"{self.court}, дело {self.number} от {self.date}"
+        return f"{self.court} {self.number} от {self.date}"
 
 
 @dataclass

@@ -10,7 +10,7 @@ from __future__ import annotations
 from collections.abc import Iterable
 
 from .agent.self_rag import SelfRAG, SelfRAGConfig
-from .cases import SAMPLE_CASES
+from .cases import load_practice
 from .core.models import Provision
 from .embed import default_embedder
 from .generate import default_answerer
@@ -62,5 +62,5 @@ def build_pipeline(
         answerer=default_answerer(),
         reranker=default_reranker(),
         config=config,
-        cases=SAMPLE_CASES if use_cases else None,
+        cases=load_practice() if use_cases else None,
     )

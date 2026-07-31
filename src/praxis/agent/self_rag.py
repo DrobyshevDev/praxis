@@ -117,7 +117,8 @@ class SelfRAG:
         # Судебная практика по процитированным нормам (граф «норма → дело»).
         if self.case_index:
             answer.related_cases = related_cases(
-                [c.provision.article_number for c in answer.citations], self.case_index
+                [(c.provision.act.id, c.provision.article_number) for c in answer.citations],
+                self.case_index,
             )
 
         if getattr(self.answerer, "synthesizes", False):

@@ -1,4 +1,4 @@
-"""Индекс «норма → дела» и подбор практики по процитированным статьям."""
+"""Индекс «(акт, статья) → дела» и подбор практики по процитированным нормам."""
 
 from __future__ import annotations
 
@@ -8,23 +8,26 @@ from collections.abc import Iterable
 from ..core.models import CaseDecision
 
 
-def build_case_index(cases: Iterable[CaseDecision]) -> dict[str, list[CaseDecision]]:
-    index: dict[str, list[CaseDecision]] = defaultdict(list)
+def build_case_index(
+    cases: Iterable[CaseDecision],
+) -> dict[tuple[str, str], list[CaseDecision]]:
+    """Ключ (act_id, статья) → дела, толкующие эту статью."""
+    index: dict[tuple[str, str], list[CaseDecision]] = defaultdict(list)
     for case in cases:
         for article in case.cited_articles:
-            index[article].append(case)
+            index[(case.act_id, article)].append(case)
     return dict(index)
 
 
 def related_cases(
-    article_numbers: Iterable[str],
-    index: dict[str, list[CaseDecision]],
+    keys: Iterable[tuple[str, str]],
+    index: dict[tuple[str, str], list[CaseDecision]],
     limit: int = 5,
 ) -> list[CaseDecision]:
     seen: set[str] = set()
     out: list[CaseDecision] = []
-    for article in article_numbers:
-        for case in index.get(article, ()):
+    for key in keys:
+        for case in index.get(key, ()):
             if case.id not in seen:
                 seen.add(case.id)
                 out.append(case)

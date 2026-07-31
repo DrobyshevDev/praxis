@@ -18,6 +18,7 @@ SAMPLE_CASES: list[CaseDecision] = [
         date="2025-03-14",
         summary="Договор расторгнут судом при существенном нарушении сроков поставки; "
         "суд применил критерий существенности из п. 2 ст. 450.",
+        act_id="gk-rf-1",
         cited_articles=frozenset({"450"}),
     ),
     CaseDecision(
@@ -27,6 +28,7 @@ SAMPLE_CASES: list[CaseDecision] = [
         date="2024-11-02",
         summary="Отказ в расторжении: нарушение признано несущественным. Суд толковал "
         "условия договора по буквальному значению слов (ст. 431).",
+        act_id="gk-rf-1",
         cited_articles=frozenset({"450", "431"}),
     ),
     CaseDecision(
@@ -36,6 +38,7 @@ SAMPLE_CASES: list[CaseDecision] = [
         date="2025-06-20",
         summary="Взысканы убытки за неисполнение обязательства; размер определён по "
         "правилам ст. 15, ответственность — по ст. 393.",
+        act_id="gk-rf-1",
         cited_articles=frozenset({"393", "15"}),
     ),
     CaseDecision(
@@ -45,6 +48,7 @@ SAMPLE_CASES: list[CaseDecision] = [
         date="2024-09-10",
         summary="Отказано в защите права ввиду злоупотребления правом (ст. 10): "
         "действия истца направлены на причинение вреда ответчику.",
+        act_id="gk-rf-1",
         cited_articles=frozenset({"10"}),
     ),
 ]
