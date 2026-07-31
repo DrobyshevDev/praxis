@@ -21,6 +21,7 @@ from .schemas import (
     CitationOut,
     SearchHit,
     SearchRequest,
+    StatsOut,
 )
 from .ui import INDEX_HTML
 
@@ -58,6 +59,9 @@ def health() -> dict:
     return {"status": "ok", "version": __version__}
 
 
+_stats: StatsOut | None = None
+
+
 @app.get("/", response_class=HTMLResponse, include_in_schema=False)
 def index() -> str:
     return INDEX_HTML
@@ -78,6 +82,7 @@ def ask(req: AskRequest) -> AnswerOut:
         CitationOut(
             id=c.provision.id,
             citation=c.provision.citation,
+            code=c.provision.act.short_title,
             article_number=c.provision.article_number,
             article_title=c.provision.article_title,
             text=c.provision.text,
@@ -122,6 +127,21 @@ def search(req: SearchRequest) -> list[SearchHit]:
         )
         for h in hits
     ]
+
+
+@v1.get("/stats", response_model=StatsOut, summary="Статистика корпуса")
+def stats() -> StatsOut:
+    global _stats
+    if _stats is None:
+        from ..ingest import load_sample_provisions
+
+        provisions = load_sample_provisions()
+        _stats = StatsOut(
+            acts=len({p.act.id for p in provisions}),
+            provisions=len(provisions),
+            codes=sorted({p.act.short_title for p in provisions}),
+        )
+    return _stats
 
 
 app.include_router(v1)

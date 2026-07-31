@@ -17,11 +17,18 @@ class SearchRequest(BaseModel):
 class CitationOut(BaseModel):
     id: str
     citation: str
+    code: str  # короткое название акта (ГК РФ, УК РФ, ...)
     article_number: str
     article_title: str
     text: str
     verdict: str | None = None
     span: list[int] | None = None  # [start, end) подтверждающего фрагмента в text
+
+
+class StatsOut(BaseModel):
+    acts: int
+    provisions: int
+    codes: list[str]
 
 
 class CaseOut(BaseModel):
