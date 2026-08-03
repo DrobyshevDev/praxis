@@ -1,5 +1,7 @@
 # Praxis
 
+**Русский** · [English](README.en.md) · [Документация](https://drobyshevdev.github.io/praxis/)
+
 Юридический ассистент по российскому праву. Отвечает на вопрос и приводит ссылки на конкретные
 нормы, каждую из которых отдельно проверяет модель. Если подтверждения в законе нет,
 то сообщает об этом.
@@ -114,9 +116,11 @@ BGE-M3, реранкер bge-reranker-v2-m3. Проверка цитат: NLI н
 провайдера: Claude для синтеза, RU-провайдеры (GigaChat, YandexGPT) для сценариев с
 требованием резидентности.
 
-Проект использует библиотеки автора (DenisDrobyshev): glia — агентный цикл в LLM-режиме
-(поиск оформлен как glia-инструмент, трейс из trajectory); mlango — трекаемый golden-eval
-через его подсистему evals (`integrations/mlango_eval`, `manage.py evaluate`).
+Проект использует две библиотеки той же организации:
+[glia](https://github.com/DrobyshevDev/glia) — агентный цикл в LLM-режиме (поиск оформлен
+как glia-инструмент, трейс из trajectory); [mlango](https://github.com/DrobyshevDev/mlango) —
+трекаемый golden-eval через его подсистему evals (`integrations/mlango_eval`,
+`manage.py evaluate`).
 
 Архитектура — [ARCHITECTURE.md](ARCHITECTURE.md).
 
