@@ -1,0 +1,47 @@
+version: 2
+
+updates:
+  # Actions are the highest-value thing to keep current: a stale third-party
+  # action is a supply-chain risk in every workflow that uses it.
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: "ci"
+    groups:
+      actions:
+        patterns: ["*"]
+
+  - package-ecosystem: pip
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: "deps"
+    # One PR for the dev toolchain, separate PRs for anything in the request
+    # path: a ruff bump needs a glance, a FastAPI or SQLAlchemy bump needs
+    # reading.
+    groups:
+      dev-tooling:
+        patterns: ["ruff", "mypy", "pytest*", "pre-commit", "build", "twine", "mkdocs*"]
+        dependency-type: development
+    ignore:
+      # Retrieval quality is pinned to specific model and runtime versions and
+      # is measured on the eval set, not on whatever pip resolves this week.
+      # These move when someone re-runs the golden set, not on a schedule.
+      - dependency-name: torch
+      - dependency-name: transformers
+      - dependency-name: sentence-transformers
+      - dependency-name: FlagEmbedding
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: docker
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: "docker"

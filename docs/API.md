@@ -37,7 +37,8 @@ curl -s http://localhost:8077/v1/search \
   -d '{"query":"толкование договора","top_k":5}'
 ```
 
-Python-клиент (только стандартная библиотека, [clients/python/praxis_client.py](../clients/python/praxis_client.py)):
+Python-клиент (только стандартная библиотека,
+[clients/python/praxis_client.py](https://github.com/DrobyshevDev/praxis/blob/master/clients/python/praxis_client.py)):
 
 ```python
 from praxis_client import PraxisClient
