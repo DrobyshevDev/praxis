@@ -1,0 +1,38 @@
+version: 2
+
+updates:
+  # Actions first: a stale third-party action is a supply-chain risk in every
+  # workflow that uses it, and the bump is almost always safe to take.
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: "ci"
+    groups:
+      actions:
+        patterns: ["*"]
+
+  - package-ecosystem: pip
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: "deps"
+    # One PR for the dev toolchain, separate PRs for anything a user installs:
+    # a ruff bump needs a glance, a FastAPI or psycopg bump needs reading.
+    groups:
+      dev-tooling:
+        patterns: ["ruff", "pytest*", "mypy", "pre-commit", "build", "twine"]
+        dependency-type: development
+    ignore:
+      # The ml extra is deliberately heavy and deliberately pinned by whoever
+      # installs it. Retrieval quality here is measured against specific model
+      # revisions, so a silent bump moves the numbers the eval suite reports.
+      - dependency-name: torch
+      - dependency-name: transformers
+      - dependency-name: sentence-transformers
+      - dependency-name: FlagEmbedding
+    open-pull-requests-limit: 5

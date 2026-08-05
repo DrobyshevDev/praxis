@@ -4,18 +4,117 @@ on:
   push:
     branches: [master]
   pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# Read-only by default. A job that needs more asks for it itself, so a
+# compromised dependency in one step cannot push to the repository.
+permissions:
+  contents: read
+
+env:
+  PYTHONUNBUFFERED: "1"
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+  FORCE_COLOR: "1"
 
 jobs:
-  test:
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
-      - name: Install
-        run: pip install -e ".[dev]"
-      - name: Lint (ruff)
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - run: pip install -e ".[dev]"
+      # No `ruff format --check` yet: nineteen files predate the formatter and
+      # reformatting them belongs in its own commit, not in a lint gate that
+      # would be red from the day it lands. pre-commit formats what a
+      # contributor touches in the meantime.
+      - name: ruff check
         run: ruff check src tests scripts clients
-      - name: Tests (offline, детерминированно)
+
+  test:
+    name: Tests (${{ matrix.os }}, Python ${{ matrix.python }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            python: "3.11"
+          - os: ubuntu-latest
+            python: "3.12"
+          - os: ubuntu-latest
+            python: "3.13"
+          - os: macos-latest
+            python: "3.12"
+          - os: windows-latest
+            python: "3.12"
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - run: pip install -e ".[dev]"
+      # The v0 slice is stdlib-only and the suite is offline and deterministic,
+      # so the matrix proves exactly one thing: that the promise holds on every
+      # interpreter and operating system the package claims to support.
+      - name: Run the test suite
         run: pytest -q
+
+  build:
+    name: Package builds and installs cleanly
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - run: pip install build twine
+      - name: Build the wheel and sdist
+        run: python -m build
+      - name: Check the metadata
+        run: twine check dist/*
+      # An editable install hides packaging mistakes: it puts the working tree
+      # on the path, so a module missing from the wheel still imports and a
+      # broken console script still resolves.
+      - name: Install the wheel into a clean environment
+        run: |
+          python -m venv /tmp/fresh
+          /tmp/fresh/bin/pip install dist/*.whl
+          /tmp/fresh/bin/python -c "import praxis; print(praxis.__name__)"
+          # Every console script the package advertises has to resolve. A typo
+          # in an entry point is invisible until a user types the command.
+          /tmp/fresh/bin/praxis-demo --help > /dev/null
+          /tmp/fresh/bin/praxis-ask --help > /dev/null
+          /tmp/fresh/bin/praxis-eval --help > /dev/null
+      - uses: actions/upload-artifact@v7
+        with:
+          name: dist
+          path: dist/
+          retention-days: 14
+
+  ci:
+    name: CI
+    runs-on: ubuntu-latest
+    if: always()
+    needs: [lint, test, build]
+    steps:
+      # One aggregate check to require in branch protection. Without it, adding
+      # a job to the matrix silently leaves it unrequired, and a red job stops
+      # blocking merges.
+      - name: Fail if any job did not succeed
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: |
+          echo "One or more jobs failed:"
+          echo '${{ toJSON(needs) }}'
+          exit 1
+      - run: echo "All checks passed."
