@@ -1,0 +1,101 @@
+site_name: Praxis
+site_description: >-
+  Юридический ассистент по российскому праву: ответ со ссылками на нормы,
+  каждая из которых проверена отдельно.
+site_url: https://drobyshevdev.github.io/praxis/
+repo_url: https://github.com/DrobyshevDev/praxis
+repo_name: DrobyshevDev/praxis
+edit_uri: edit/master/docs/
+copyright: >-
+  Apache-2.0. Praxis не оказывает юридических услуг и не заменяет консультацию юриста.
+
+theme:
+  name: material
+  language: ru
+  features:
+    # navigation.instant is deliberately absent: it breaks the i18n language
+    # switcher, and the switcher matters more here than the transition.
+    - navigation.tracking
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - content.code.copy
+    - content.action.edit
+    - search.suggest
+    - search.highlight
+    - toc.follow
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Тёмная тема
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Светлая тема
+  icon:
+    repo: fontawesome/brands/github
+
+plugins:
+  - search:
+      lang: ru
+  # One file per translation: docs/index.md is Russian, docs/index.en.md is
+  # English. Russian is the default because the subject is Russian law and the
+  # reference pages quote it directly; a page with no translation falls back
+  # rather than disappearing from the navigation.
+  - i18n:
+      docs_structure: suffix
+      fallback_to_default: true
+      reconfigure_material: true
+      reconfigure_search: true
+      languages:
+        - locale: ru
+          name: Русский
+          default: true
+          build: true
+        - locale: en
+          name: English
+          build: true
+          site_name: Praxis
+          site_description: >-
+            A legal assistant for Russian law that answers with the provisions
+            it rests on, each citation verified separately.
+          nav_translations:
+            Обзор: Overview
+            Открытый API: Public API
+            Разработка: Development
+            Сравнение с альтернативами: Comparison
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+
+nav:
+  - Обзор: index.md
+  - Открытый API: API.md
+  - Разработка: DEVELOPMENT.md
+  - Сравнение с альтернативами: COMPETITIVE.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/DrobyshevDev/praxis
