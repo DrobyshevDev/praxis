@@ -31,3 +31,6 @@ Thumbs.db
 
 # PyInstaller
 *.spec
+
+# Кэш эмбеддингов (регенерируется)
+.praxis_cache/
