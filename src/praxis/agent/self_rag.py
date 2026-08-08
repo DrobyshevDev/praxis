@@ -28,7 +28,7 @@ _SENTENCE_RE = re.compile(r"(?<=[.!?])\s+")
 @dataclass
 class SelfRAGConfig:
     retrieve_pool: int = 20
-    rerank_pool: int = 24  # верхний предел кандидатов на реранк (граф может добавить много)
+    rerank_pool: int = 16  # верхний предел кандидатов на реранк (граф может добавить много)
     rerank_top_k: int = 6
     answer_top_k: int = 5
     max_rounds: int = 2
