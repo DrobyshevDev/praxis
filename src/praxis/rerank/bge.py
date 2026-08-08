@@ -46,7 +46,9 @@ class BGEReranker:
             [query, f"{c.provision.article_title}. {c.provision.text}"]
             for c in candidates
         ]
-        scores = model.predict(pairs)
+        # Небольшой батч: cross-encoder по длинным текстам иначе даёт спайк памяти
+        # на GPU с 8 ГБ (модели уже держат ~5 ГБ).
+        scores = model.predict(pairs, batch_size=16)
         ranked = sorted(zip(candidates, scores), key=lambda x: x[1], reverse=True)
         # Логиты cross-encoder → 0..1 через sigmoid, чтобы скор был калиброванной
         # оценкой релевантности (используется как уверенность экстрактивного ответа).

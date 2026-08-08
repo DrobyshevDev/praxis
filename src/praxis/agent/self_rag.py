@@ -28,6 +28,7 @@ _SENTENCE_RE = re.compile(r"(?<=[.!?])\s+")
 @dataclass
 class SelfRAGConfig:
     retrieve_pool: int = 20
+    rerank_pool: int = 24  # верхний предел кандидатов на реранк (граф может добавить много)
     rerank_top_k: int = 6
     answer_top_k: int = 5
     max_rounds: int = 2
@@ -61,6 +62,7 @@ class SelfRAG:
 
         for rnd in range(1, cfg.max_rounds + 1):
             cands = self.retriever.search(query, top_k=cfg.retrieve_pool)
+            cands = cands[: cfg.rerank_pool]  # ограничиваем нагрузку на реранкер (GPU)
             if self.reranker is not None:
                 cands = self.reranker.rerank(query, cands, top_k=cfg.rerank_top_k)
             else:
