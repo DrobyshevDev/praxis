@@ -45,7 +45,10 @@ class DenseRetriever:
             import numpy as np
 
             self._np = np
-            if vectors:
+            # len(), а не `if vectors:` — из кэша приходит numpy-массив, и `if array:`
+            # бросает ValueError (ambiguous truth), после чего поиск молча падал на
+            # медленный чистый Python (косинус по 12 742×1024 = ~15с/запрос).
+            if len(vectors) > 0:
                 mat = np.asarray(vectors, dtype="float32")
                 norms = np.linalg.norm(mat, axis=1, keepdims=True)
                 norms[norms == 0] = 1.0
