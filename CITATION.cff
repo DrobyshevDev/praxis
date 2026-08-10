@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+title: >-
+  praxis — a legal assistant for Russian law whose citations are checked
+message: >-
+  If you use praxis in work you publish, please cite it using this entry.
+abstract: >-
+  A question-answering system over Russian statutory law. Retrieval is hybrid -- lexical plus dense with a cross-encoder reranker -- and a natural language inference model checks that each cited provision supports the claim it is attached to, so an unsupported citation is caught rather than returned. The default answer is extractive.
+authors:
+  - family-names: Drobyshev
+    given-names: Denis
+repository-code: https://github.com/DrobyshevDev/praxis
+url: https://github.com/DrobyshevDev/praxis
+license: Apache-2.0
+keywords:
+  - legal-tech
+  - retrieval-augmented-generation
+  - citation-verification
+  - natural-language-inference
+  - russian
+  - information-retrieval
