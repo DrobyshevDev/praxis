@@ -2,6 +2,11 @@
 
 **Русский** · [English](README.en.md) · [Документация](https://drobyshevdev.github.io/praxis/)
 
+[![CI](https://github.com/DrobyshevDev/praxis/actions/workflows/ci.yml/badge.svg)](https://github.com/DrobyshevDev/praxis/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/DrobyshevDev/praxis/actions/workflows/codeql.yml/badge.svg)](https://github.com/DrobyshevDev/praxis/actions/workflows/codeql.yml)
+[![Лицензия: Apache-2.0](https://img.shields.io/badge/%D0%BB%D0%B8%D1%86%D0%B5%D0%BD%D0%B7%D0%B8%D1%8F-Apache--2.0-blue)](LICENSE)
+[![Python 3.12](https://img.shields.io/badge/python-3.12-blue)](pyproject.toml)
+
 Юридический ассистент по российскому праву. Отвечает на вопрос и приводит ссылки на конкретные
 нормы, каждую из которых отдельно проверяет модель. Если подтверждения в законе нет,
 то сообщает об этом.
@@ -10,6 +15,26 @@
 <img width="1086" height="1046" alt="image" src="https://github.com/user-attachments/assets/e2cdd567-04e9-486b-973a-0a5a7c5556f2" />
 <img width="1076" height="1046" alt="image" src="https://github.com/user-attachments/assets/b0e1a329-74b5-4490-aac5-dc6cc282a4d9" />
 
+
+## Запуск
+
+```bash
+git clone https://github.com/DrobyshevDev/praxis.git
+cd praxis
+docker compose up app
+```
+
+Открыть http://localhost:8077. Ни ключей, ни GPU, ни сети: образ ставит extra `api`,
+поднимает `PRAXIS_OFFLINE=1` и несёт корпус внутри себя, поэтому детерминированные
+компоненты работают без единого обращения наружу, а ответ по умолчанию экстрактивный —
+дословный текст норм.
+
+Это срез «скачал и запустил», а не продовое качество. Плотный поиск, реранкер и
+NLI-проверка цитат требуют extra `ml` и предпочитают GPU — как их поднять, написано в
+[docs/DEVELOPMENT.md](docs/DEVELOPMENT.md). Синтезирующий режим подключается через
+`ANTHROPIC_API_KEY` и остаётся необязательным: поиск работает без него.
+
+HTTP-API и Python-клиент — [docs/API.md](docs/API.md).
 
 ## Проблематика
 
@@ -68,9 +93,24 @@ Claude включается ключом и проходит ту же пров�
 pravo.gov.ru. На этом построен основной сценарий: в репозитории лежит парсер официального
 текста (`statute_parser`) и образец корпуса ГК; полный корпус подключается тем же путём.
 
-Полный текст ГК РФ уже выгружен в репозиторий (`corpus/gk-rf.json` — 1712 статей,
-4717 норм, все четыре части, источник Викитека) и подключается через `PRAXIS_CORPUS_DIR`.
-Актуальность редакции нужно сверять с pravo.gov.ru.
+В репозитории лежат шесть кодексов, подключаются через `PRAXIS_CORPUS_DIR`:
+
+| Файл | Кодекс |
+|---|---|
+| `corpus/gk-rf.json` | Гражданский — 1712 статей, 4717 норм, все четыре части |
+| `corpus/nk-rf.json` | Налоговый |
+| `corpus/koap-rf.json` | Об административных правонарушениях |
+| `corpus/uk-rf.json` | Уголовный |
+| `corpus/tk-rf.json` | Трудовой |
+| `corpus/zhk-rf.json` | Жилищный |
+
+Все шесть — транскрипции с Викитеки, о чём говорит поле `edition` в каждом файле.
+Актуальность редакции нужно сверять с pravo.gov.ru: это то, для чего в репозитории
+лежит парсер официального текста.
+
+Тексты кодексов — официальные документы, и по п. 6 ст. 1259 ГК РФ объектами авторских
+прав не являются. Apache-2.0 в этом репозитории покрывает код, парсер, граф
+перекрёстных ссылок и разметку корпуса, а не сами тексты законов.
 
 Судебная практика сложнее. Открытого структурированного корпуса уровня Caselaw Access для
 России нет, kad.arbitr и ГАС «Правосудие» отдают данные тяжело. Это следующий этап,
