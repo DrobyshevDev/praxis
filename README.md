@@ -7,6 +7,9 @@
 то сообщает об этом.
 
 <img width="2048" height="1152" alt="dff68b0c159aa1d94c4ec3732c9dae44" src="https://github.com/user-attachments/assets/cd75be1d-3944-4d3f-bbbd-dba4c4d1c12f" />
+<img width="1086" height="1046" alt="image" src="https://github.com/user-attachments/assets/e2cdd567-04e9-486b-973a-0a5a7c5556f2" />
+<img width="1076" height="1046" alt="image" src="https://github.com/user-attachments/assets/b0e1a329-74b5-4490-aac5-dc6cc282a4d9" />
+
 
 ## Проблематика
 
