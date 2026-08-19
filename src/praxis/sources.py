@@ -18,6 +18,25 @@ _SLUG = {
 }
 
 
+def _ru_date(iso: str | None) -> str | None:
+    """'1994-11-30' → '30.11.1994'."""
+    if not iso:
+        return None
+    parts = iso.split("-")
+    if len(parts) != 3:
+        return None
+    y, m, d = parts
+    return f"{d}.{m}.{y}"
+
+
+def act_reference(number: str | None, date: str | None) -> str | None:
+    """Реквизиты акта для показа рядом с нормой: '51-ФЗ от 30.11.1994'."""
+    if not number:
+        return None
+    d = _ru_date(date)
+    return f"{number} от {d}" if d else number
+
+
 def verify_url(act_id: str, article_number: str) -> str | None:
     """URL «сверить с действующей редакцией» для (акт, статья), или None."""
     slug = _SLUG.get(act_id)

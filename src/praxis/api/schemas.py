@@ -24,6 +24,7 @@ class CitationOut(BaseModel):
     verdict: str | None = None
     span: list[int] | None = None  # [start, end) подтверждающего фрагмента в text
     source_url: str | None = None  # «сверить с действующей редакцией»
+    act_ref: str | None = None  # реквизиты акта, напр. «51-ФЗ от 30.11.1994»
 
 
 class StatsOut(BaseModel):

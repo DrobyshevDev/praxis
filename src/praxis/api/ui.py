@@ -81,6 +81,7 @@ a{color:var(--accent);text-decoration:none}
 .cite:hover{border-color:color-mix(in srgb,var(--accent) 40%,var(--border))}
 .cite .head{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
 .cite .num{font-weight:650;font-size:15px}
+.cite .reqs{color:var(--faint);font-size:12px;white-space:nowrap}
 .cite .title{color:var(--muted);font-size:14px}
 .verdict{font-size:11.5px;font-weight:700;border-radius:6px;padding:2px 8px}
 .v-ok{color:var(--good);background:var(--good-bg)} .v-no{color:var(--bad);background:var(--bad-bg)}
@@ -203,6 +204,7 @@ function render(a){
       h+='<div class="cite"><div class="head">';
       h+=`<span class="badge" style="background:${color(c.code)}">${esc(c.code||'')}</span>`;
       h+=`<span class="num">${esc(c.citation)}</span>`;
+      if(c.act_ref)h+=`<span class="reqs">· ${esc(c.act_ref)}</span>`;
       if(v)h+=`<span class="verdict ${v[0]}">${v[1]}</span>`;
       h+='<span class="acts">';
       if(c.source_url)h+=`<a class="verify" href="${esc(c.source_url)}" target="_blank" rel="noopener" title="Открыть действующую редакцию статьи">сверить ↗</a>`;

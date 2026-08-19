@@ -14,7 +14,7 @@ from fastapi.responses import HTMLResponse
 from .. import __version__
 from ..config import config_from_env
 from ..pipeline import build_pipeline
-from ..sources import verify_url
+from ..sources import act_reference, verify_url
 from .schemas import (
     AnswerOut,
     AskRequest,
@@ -90,6 +90,7 @@ def ask(req: AskRequest) -> AnswerOut:
             verdict=verdict_by_id.get(c.provision.id),
             span=list(c.span) if c.span else None,
             source_url=verify_url(c.provision.act.id, c.provision.article_number),
+            act_ref=act_reference(c.provision.act.number, c.provision.act.date),
         )
         for c in answer.citations
     ]
