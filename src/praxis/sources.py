@@ -15,6 +15,7 @@ _SLUG = {
     "tk-rf": "tk",
     "koap-rf": "koap",
     "zhk-rf": "jk",
+    "zozpp": "zozpp",
 }
 
 

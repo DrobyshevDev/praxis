@@ -9,6 +9,7 @@ def test_verify_url_for_each_code():
     assert verify_url("koap-rf", "12.8") == "https://www.zakonrf.info/koap/12.8/"
     # ЖК на zakonrf.info — slug jk, не zhk.
     assert verify_url("zhk-rf", "30") == "https://www.zakonrf.info/jk/30/"
+    assert verify_url("zozpp", "18") == "https://www.zakonrf.info/zozpp/18/"
 
 
 def test_verify_url_tolerates_sample_suffix():
