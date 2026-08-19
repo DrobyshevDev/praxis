@@ -24,6 +24,12 @@ from ..verify.base import CitationVerifier
 
 _SENTENCE_RE = re.compile(r"(?<=[.!?])\s+")
 
+_LOW_CONFIDENCE_NOTE = (
+    "⚠ Уверенного ответа по загруженным кодексам не нашлось. Ниже — наиболее "
+    "близкие по смыслу нормы; проверьте их применимость к вашей ситуации или "
+    "обратитесь к юристу."
+)
+
 
 @dataclass
 class SelfRAGConfig:
@@ -35,6 +41,10 @@ class SelfRAGConfig:
     sufficiency_score: float = 0.35  # ниже — делаем доп-раунд с переформулировкой
     relevance_floor: float = 0.15  # нормы слабее — отбрасываем из ответа как шум
     max_citations: int = 4  # верхняя граница числа норм в ответе
+    # Ниже порога — честно предупреждаем, что прямого ответа нет. Калибровано по
+    # cross-encoder bge-reranker-v2-m3: off-topic он оценивает ~0.50 (sigmoid логита≈0,
+    # «не знаю»), релевантные нормы — 0.60–0.73. 0.55 отделяет одно от другого.
+    min_confidence: float = 0.55
 
 
 class SelfRAG:
@@ -109,6 +119,10 @@ class SelfRAG:
             kept = kept[: cfg.max_citations] or provisions[:1]
             answer = self.answerer.answer(question, kept)
             answer.confidence = round(min(1.0, max(0.0, kept[0].score)), 3) if kept else 0.0
+            # Честность важнее вида уверенного ответа: при низкой релевантности прямо
+            # говорим, что точного ответа нет, а не выдаём слабые совпадения за факт.
+            if answer.confidence < cfg.min_confidence:
+                answer.text = _LOW_CONFIDENCE_NOTE + "\n\n" + answer.text
 
         # Подсвечиваем в каждой норме фразу, релевантную вопросу (span-level).
         answer.citations = [

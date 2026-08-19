@@ -23,6 +23,7 @@ class CitationOut(BaseModel):
     text: str
     verdict: str | None = None
     span: list[int] | None = None  # [start, end) подтверждающего фрагмента в text
+    source_url: str | None = None  # «сверить с действующей редакцией»
 
 
 class StatsOut(BaseModel):

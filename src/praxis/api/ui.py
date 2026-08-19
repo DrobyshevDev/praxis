@@ -86,9 +86,15 @@ a{color:var(--accent);text-decoration:none}
 .v-ok{color:var(--good);background:var(--good-bg)} .v-no{color:var(--bad);background:var(--bad-bg)}
 .v-q{color:var(--muted);background:var(--line)}
 .cite .txt{color:var(--fg);font-size:14.5px;line-height:1.65;margin-top:9px}
-.copy{margin-left:auto;font-size:12px;color:var(--faint);background:transparent;border:1px solid var(--border);
+.acts{margin-left:auto;display:flex;gap:8px;align-items:center}
+.copy{font-size:12px;color:var(--faint);background:transparent;border:1px solid var(--border);
   border-radius:8px;padding:3px 10px;cursor:pointer;transition:all .15s}
 .copy:hover{color:var(--fg);border-color:var(--accent)}
+.verify{font-size:12px;color:var(--muted);border:1px solid var(--border);border-radius:8px;
+  padding:3px 10px;white-space:nowrap;transition:all .15s}
+.verify:hover{color:var(--accent);border-color:var(--accent)}
+.srcnote{color:var(--faint);font-size:12.5px;margin-top:16px;padding-top:12px;
+  border-top:1px solid var(--line)}
 mark{background:color-mix(in srgb,var(--accent) 22%,transparent);color:inherit;border-radius:3px;
   padding:0 2px;box-decoration-break:clone}
 .case{border-left:3px solid var(--accent);background:var(--line);border-radius:0 10px 10px 0;
@@ -198,10 +204,13 @@ function render(a){
       h+=`<span class="badge" style="background:${color(c.code)}">${esc(c.code||'')}</span>`;
       h+=`<span class="num">${esc(c.citation)}</span>`;
       if(v)h+=`<span class="verdict ${v[0]}">${v[1]}</span>`;
-      h+=`<button class="copy" data-c="${i}">копировать</button></div>`;
+      h+='<span class="acts">';
+      if(c.source_url)h+=`<a class="verify" href="${esc(c.source_url)}" target="_blank" rel="noopener" title="Открыть действующую редакцию статьи">сверить ↗</a>`;
+      h+=`<button class="copy" data-c="${i}">копировать</button></span></div>`;
       h+=`<div class="title">${esc(c.article_title)}</div>`;
       h+=`<div class="txt">${hl(c.text,c.span)}</div></div>`;
     }
+    h+='<div class="srcnote">Тексты норм — из корпуса (транскрипция, Викитека) и могут отставать от действующей редакции. «Сверить» открывает текущий текст статьи на zakonrf.info.</div>';
   }
   if(a.related_cases&&a.related_cases.length){
     h+=`<div class="sec-h">Судебная практика <span class="n">по этим нормам</span></div>`;
