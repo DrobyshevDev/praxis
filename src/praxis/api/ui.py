@@ -123,6 +123,30 @@ details pre{white-space:pre-wrap;color:var(--muted);font-size:13px;line-height:1
 .spin{width:15px;height:15px;border:2px solid var(--line);border-top-color:var(--accent);
   border-radius:50%;animation:s .7s linear infinite}
 @keyframes s{to{transform:rotate(360deg)}}
+.calc{margin:20px 0 0}
+.calc>summary{cursor:pointer;color:var(--muted);font-size:14px;font-weight:600;list-style:none;
+  user-select:none;padding:10px 0;text-align:center}
+.calc>summary::-webkit-details-marker{display:none}
+.calc>summary::before{content:"🧮 "}
+.calcgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:6px}
+.calccard{background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  box-shadow:var(--shadow);padding:16px 18px}
+.calct{font-family:var(--serif);font-size:16px;font-weight:600;margin-bottom:12px}
+.calcrow{display:flex;gap:8px;margin-bottom:8px;align-items:center;flex-wrap:wrap}
+.calccard input[type=number],.calccard select{flex:1;min-width:0;border:1px solid var(--border);
+  background:var(--bg);color:var(--fg);border-radius:9px;padding:9px 11px;font-size:14px;outline:none}
+.calccard input:focus,.calccard select:focus{border-color:var(--accent)}
+.calccard .chk{flex:1;display:flex;align-items:center;gap:7px;font-size:13.5px;color:var(--muted);cursor:pointer}
+.calccard button{border:0;border-radius:9px;background:var(--accent);color:var(--accent-fg);
+  font-size:14px;font-weight:600;padding:9px 16px;cursor:pointer;transition:opacity .15s;white-space:nowrap}
+.calccard button:hover{opacity:.9}
+.calcout{margin-top:8px;min-height:1px}
+.calc-amt{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+.calc-bd{color:var(--muted);font-size:13px;margin-top:3px}
+.calc-basis{font-size:12.5px;margin-top:8px;padding-top:8px;border-top:1px solid var(--line);color:var(--faint)}
+.calc-basis a{color:var(--muted)}
+.calc-err{color:var(--bad);font-size:13.5px}
+@media(max-width:620px){.calcgrid{grid-template-columns:1fr}}
 .foot{border-top:1px solid var(--line);margin-top:20px;padding:26px 0 60px;color:var(--faint);
   font-size:13px;text-align:center}
 .foot a{color:var(--muted)} .foot .leg{margin-top:8px;font-size:12px}
@@ -159,6 +183,38 @@ details pre{white-space:pre-wrap;color:var(--muted);font-size:13px;line-height:1
     <div class="label">Недавние</div>
     <div class="chips" id="hist" style="justify-content:flex-start"></div>
   </div>
+
+  <details class="calc" id="calc">
+    <summary>Калькуляторы: неустойка и госпошлина</summary>
+    <div class="calcgrid">
+      <div class="calccard">
+        <div class="calct">Неустойка потребителю</div>
+        <div class="calcrow">
+          <input id="npPrice" type="number" min="0" placeholder="цена, ₽">
+          <input id="npDays" type="number" min="0" placeholder="дней просрочки">
+        </div>
+        <div class="calcrow">
+          <select id="npKind">
+            <option value="товар">товар — 1%/день</option>
+            <option value="услуга">услуга/работа — 3%/день</option>
+          </select>
+          <button id="npBtn" type="button">Рассчитать</button>
+        </div>
+        <div class="calcout" id="npOut"></div>
+      </div>
+      <div class="calccard">
+        <div class="calct">Госпошлина в суд</div>
+        <div class="calcrow">
+          <input id="feeAmt" type="number" min="0" placeholder="цена иска, ₽">
+        </div>
+        <div class="calcrow">
+          <label class="chk"><input id="feeCons" type="checkbox">иск о защите прав потребителя</label>
+          <button id="feeBtn" type="button">Рассчитать</button>
+        </div>
+        <div class="calcout" id="feeOut"></div>
+      </div>
+    </div>
+  </details>
 
   <div class="out" id="out"></div>
 </div>
@@ -270,6 +326,35 @@ function renderHist(){const h=JSON.parse(localStorage.getItem('praxis_hist')||'[
 examples.innerHTML=EXAMPLES.map(x=>`<span class="chip">${esc(x)}</span>`).join('');
 examples.querySelectorAll('.chip').forEach((el,i)=>el.onclick=()=>{q.value=EXAMPLES[i];ask();});
 renderHist();
+
+// --- Калькуляторы ---
+function rub(x){return (Math.round(x*100)/100).toLocaleString('ru')+' ₽';}
+function basisHtml(b){let s=esc(b.citation);
+  if(b.source_url)s=`<a href="${esc(b.source_url)}" target="_blank" rel="noopener">${s} ↗</a>`;
+  return `<div class="calc-basis">Основание: ${s}. ${esc(b.note||'')}</div>`;}
+async function calcPost(path,body,outEl){
+  outEl.innerHTML='<div class="calc-bd">…</div>';
+  try{const r=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    if(!r.ok){const e=await r.json().catch(()=>({}));outEl.innerHTML='<div class="calc-err">'+esc(e.detail||'Проверьте ввод')+'</div>';return null;}
+    return await r.json();
+  }catch(e){outEl.innerHTML='<div class="calc-err">Не удалось рассчитать.</div>';return null;}
+}
+document.getElementById('npBtn').onclick=async()=>{
+  const price=parseFloat(document.getElementById('npPrice').value),days=parseInt(document.getElementById('npDays').value),
+    out=document.getElementById('npOut');
+  if(!(price>0)||!(days>=0)){out.innerHTML='<div class="calc-err">Введите цену и число дней.</div>';return;}
+  const d=await calcPost('/v1/penalty',{price,days,kind:document.getElementById('npKind').value},out);
+  if(!d)return;
+  out.innerHTML=`<div class="calc-amt">${rub(d.amount)}</div><div class="calc-bd">${esc(d.breakdown)}${d.capped?' · достигнут потолок':''}</div>`+basisHtml(d.basis);
+};
+document.getElementById('feeBtn').onclick=async()=>{
+  const amount=parseFloat(document.getElementById('feeAmt').value),out=document.getElementById('feeOut');
+  if(!(amount>=0)){out.innerHTML='<div class="calc-err">Введите цену иска.</div>';return;}
+  const d=await calcPost('/v1/fee',{amount,consumer:document.getElementById('feeCons').checked},out);
+  if(!d)return;
+  const head=d.exempt?'0 ₽ — освобождён':rub(d.fee);
+  out.innerHTML=`<div class="calc-amt">${esc(head)}</div><div class="calc-bd">${esc(d.breakdown)}</div>`+basisHtml(d.basis);
+};
 fetch('/v1/stats').then(r=>r.json()).then(s=>{
   corpus.innerHTML=`<span>${s.provisions.toLocaleString('ru')} норм · ${s.acts} кодексов</span>`+
     s.codes.map(c=>`<span class="badge" style="background:${color(c)}">${esc(c)}</span>`).join('');

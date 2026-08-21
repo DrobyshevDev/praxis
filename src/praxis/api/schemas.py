@@ -65,6 +65,40 @@ class ClaimOut(BaseModel):
     disclaimer: str = ""
 
 
+class BasisOut(BaseModel):
+    citation: str
+    source_url: str | None = None
+    note: str = ""
+
+
+class PenaltyRequest(BaseModel):
+    price: float = Field(..., gt=0, description="Цена товара/услуги, ₽")
+    days: int = Field(..., ge=0, le=100_000, description="Дней просрочки")
+    kind: str = Field("товар", description="«товар» (1%/день) или «услуга» (3%/день)")
+
+
+class PenaltyOut(BaseModel):
+    amount: float
+    per_day: float
+    days: int
+    rate_pct: float
+    capped: bool
+    breakdown: str
+    basis: BasisOut
+
+
+class FeeRequest(BaseModel):
+    amount: float = Field(..., ge=0, description="Цена иска, ₽")
+    consumer: bool = Field(False, description="Иск о защите прав потребителей")
+
+
+class FeeOut(BaseModel):
+    fee: float
+    exempt: bool
+    breakdown: str
+    basis: BasisOut
+
+
 class SearchHit(BaseModel):
     citation: str
     article_title: str

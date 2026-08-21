@@ -7,7 +7,7 @@ ML-специалистов. CORS открыт (API только на чтени
 
 from __future__ import annotations
 
-from fastapi import APIRouter, FastAPI
+from fastapi import APIRouter, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 
@@ -15,14 +15,19 @@ from .. import __version__
 from ..config import config_from_env
 from ..pipeline import build_pipeline
 from ..sources import act_reference, verify_url
-from ..tasks import build_claim, claim_applicable
+from ..tasks import build_claim, claim_applicable, court_fee, penalty
 from .schemas import (
     AnswerOut,
     AskRequest,
+    BasisOut,
     CaseOut,
     CitationOut,
     ClaimOut,
     ClaimRequest,
+    FeeOut,
+    FeeRequest,
+    PenaltyOut,
+    PenaltyRequest,
     SearchHit,
     SearchRequest,
     StatsOut,
@@ -132,6 +137,36 @@ def claim(req: ClaimRequest) -> ClaimOut:
         based_on=result.based_on,
         note=result.note,
         disclaimer=result.disclaimer,
+    )
+
+
+@v1.post("/penalty", response_model=PenaltyOut, summary="Калькулятор неустойки (ЗоЗПП)")
+def calc_penalty(req: PenaltyRequest) -> PenaltyOut:
+    """Неустойка потребителю за просрочку: товар 1%/день (ст. 23 ЗоЗПП),
+    услуга 3%/день с потолком в цену услуги (ст. 28 ЗоЗПП)."""
+    try:
+        r = penalty(req.price, req.days, kind=req.kind)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    return PenaltyOut(
+        amount=r.amount, per_day=r.per_day, days=r.days, rate_pct=r.rate_pct,
+        capped=r.capped, breakdown=r.breakdown,
+        basis=BasisOut(citation=r.basis.citation, source_url=r.basis.source_url, note=r.basis.note),
+    )
+
+
+@v1.post("/fee", response_model=FeeOut, summary="Калькулятор госпошлины (НК РФ)")
+def calc_fee(req: FeeRequest) -> FeeOut:
+    """Госпошлина при подаче имущественного иска в суд общей юрисдикции
+    (ст. 333.19 НК, ред. 259-ФЗ). Для исков о защите прав потребителей —
+    льгота ст. 333.36 НК (до 1 000 000 ₽ пошлина не уплачивается)."""
+    try:
+        r = court_fee(req.amount, consumer=req.consumer)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    return FeeOut(
+        fee=r.fee, exempt=r.exempt, breakdown=r.breakdown,
+        basis=BasisOut(citation=r.basis.citation, source_url=r.basis.source_url, note=r.basis.note),
     )
 
 
