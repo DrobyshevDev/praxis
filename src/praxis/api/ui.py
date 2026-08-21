@@ -96,6 +96,13 @@ a{color:var(--accent);text-decoration:none}
 .verify:hover{color:var(--accent);border-color:var(--accent)}
 .srcnote{color:var(--faint);font-size:12.5px;margin-top:16px;padding-top:12px;
   border-top:1px solid var(--line)}
+.mkclaim{font-size:14px;font-weight:600;color:var(--accent);background:transparent;
+  border:1px solid var(--accent);border-radius:10px;padding:9px 16px;cursor:pointer;transition:all .15s}
+.mkclaim:hover{background:var(--accent);color:var(--accent-fg)}
+.mkclaim:disabled{opacity:.55;cursor:default}
+.claimdoc{white-space:pre-wrap;font-size:14px;line-height:1.7;background:var(--line);
+  border-radius:10px;padding:16px 18px;margin-top:12px}
+.claimnote{color:var(--muted);font-size:13px;margin-top:10px}
 mark{background:color-mix(in srgb,var(--accent) 22%,transparent);color:inherit;border-radius:3px;
   padding:0 2px;box-decoration-break:clone}
 .case{border-left:3px solid var(--accent);background:var(--line);border-radius:0 10px 10px 0;
@@ -214,6 +221,11 @@ function render(a){
     }
     h+='<div class="srcnote">Тексты норм — из корпуса (транскрипция, Викитека) и могут отставать от действующей редакции. «Сверить» открывает текущий текст статьи на zakonrf.info.</div>';
   }
+  if(a.claim_applicable){
+    h+=`<div class="sec-h">Документ <span class="n">на основе найденных норм</span></div>`;
+    h+='<button class="mkclaim" id="mkclaim">Составить претензию</button>';
+    h+='<div id="claimbox"></div>';
+  }
   if(a.related_cases&&a.related_cases.length){
     h+=`<div class="sec-h">Судебная практика <span class="n">по этим нормам</span></div>`;
     for(const c of a.related_cases)
@@ -227,6 +239,25 @@ function render(a){
   out.innerHTML=h;
   out.querySelectorAll('.copy').forEach(el=>el.onclick=()=>{navigator.clipboard.writeText(cites[+el.dataset.c]);
     el.textContent='скопировано';setTimeout(()=>el.textContent='копировать',1200);});
+  const mk=document.getElementById('mkclaim');
+  if(mk)mk.onclick=()=>makeClaim(a.question,mk);
+}
+
+async function makeClaim(question,btn){
+  btn.disabled=true;const box=document.getElementById('claimbox');
+  box.innerHTML='<div class="skel" style="margin-top:12px"><span class="spin"></span>Собираю претензию…</div>';
+  try{
+    const r=await fetch('/v1/claim',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question})});
+    const c=await r.json();
+    if(!c.applicable){box.innerHTML='<div class="claimnote">'+esc(c.note||'Претензия неприменима.')+'</div>';btn.disabled=false;return;}
+    let hh='<div class="claimdoc">'+esc(c.text)+'</div>';
+    hh+='<div style="margin-top:10px"><button class="copy" id="claimcopy">копировать текст</button></div>';
+    hh+='<div class="claimnote">⚠ '+esc(c.disclaimer)+'</div>';
+    box.innerHTML=hh;
+    document.getElementById('claimcopy').onclick=()=>{navigator.clipboard.writeText(c.text);
+      const b=document.getElementById('claimcopy');b.textContent='скопировано';setTimeout(()=>b.textContent='копировать текст',1200);};
+  }catch(e){box.innerHTML='<div class="warn">Не удалось собрать претензию.</div>';}
+  btn.disabled=false;
 }
 
 function saveHist(x){let h=JSON.parse(localStorage.getItem('praxis_hist')||'[]');

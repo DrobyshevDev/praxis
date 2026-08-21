@@ -15,11 +15,14 @@ from .. import __version__
 from ..config import config_from_env
 from ..pipeline import build_pipeline
 from ..sources import act_reference, verify_url
+from ..tasks import build_claim, claim_applicable
 from .schemas import (
     AnswerOut,
     AskRequest,
     CaseOut,
     CitationOut,
+    ClaimOut,
+    ClaimRequest,
     SearchHit,
     SearchRequest,
     StatsOut,
@@ -113,6 +116,22 @@ def ask(req: AskRequest) -> AnswerOut:
         unverified_claims=answer.unverified_claims,
         steps=answer.steps,
         related_cases=cases,
+        claim_applicable=claim_applicable(answer),
+    )
+
+
+@v1.post("/claim", response_model=ClaimOut, summary="Собрать досудебную претензию")
+def claim(req: ClaimRequest) -> ClaimOut:
+    """Готовая претензия по вопросу: обоснование из найденных норм + статутные блоки,
+    факты — плейсхолдеры. Применимо к гражданско-потребительским вопросам."""
+    answer = get_pipeline().answer(req.question)
+    result = build_claim(answer)
+    return ClaimOut(
+        applicable=result.applicable,
+        text=result.text,
+        based_on=result.based_on,
+        note=result.note,
+        disclaimer=result.disclaimer,
     )
 
 

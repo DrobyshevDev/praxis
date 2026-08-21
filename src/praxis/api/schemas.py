@@ -50,6 +50,19 @@ class AnswerOut(BaseModel):
     unverified_claims: list[str]
     steps: list[str]
     related_cases: list[CaseOut] = []
+    claim_applicable: bool = False  # можно ли собрать досудебную претензию (/v1/claim)
+
+
+class ClaimRequest(BaseModel):
+    question: str = Field(..., min_length=1, max_length=1000)
+
+
+class ClaimOut(BaseModel):
+    applicable: bool
+    text: str = ""
+    based_on: list[str] = []  # нормы-основания
+    note: str = ""  # пояснение, когда претензия неприменима
+    disclaimer: str = ""
 
 
 class SearchHit(BaseModel):
