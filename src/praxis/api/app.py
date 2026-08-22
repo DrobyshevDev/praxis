@@ -15,7 +15,14 @@ from .. import __version__
 from ..config import config_from_env
 from ..pipeline import build_pipeline
 from ..sources import act_reference, verify_url
-from ..tasks import build_claim, build_lawsuit, claim_applicable, court_fee, penalty
+from ..tasks import (
+    build_claim,
+    build_lawsuit,
+    claim_applicable,
+    court_fee,
+    interest_395,
+    penalty,
+)
 from .schemas import (
     AnswerOut,
     AskRequest,
@@ -26,6 +33,8 @@ from .schemas import (
     ClaimRequest,
     FeeOut,
     FeeRequest,
+    InterestOut,
+    InterestRequest,
     PenaltyOut,
     PenaltyRequest,
     SearchHit,
@@ -178,6 +187,20 @@ def calc_fee(req: FeeRequest) -> FeeOut:
         raise HTTPException(status_code=400, detail=str(e)) from e
     return FeeOut(
         fee=r.fee, exempt=r.exempt, breakdown=r.breakdown,
+        basis=BasisOut(citation=r.basis.citation, source_url=r.basis.source_url, note=r.basis.note),
+    )
+
+
+@v1.post("/interest", response_model=InterestOut, summary="Калькулятор процентов (ст. 395 ГК)")
+def calc_interest(req: InterestRequest) -> InterestOut:
+    """Проценты за пользование чужими денежными средствами (ст. 395 ГК) за период с
+    неизменной ключевой ставкой ЦБ (ставку задаёт пользователь: она регулярно меняется)."""
+    try:
+        r = interest_395(req.principal, req.rate_pct, req.days)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    return InterestOut(
+        amount=r.amount, breakdown=r.breakdown,
         basis=BasisOut(citation=r.basis.citation, source_url=r.basis.source_url, note=r.basis.note),
     )
 

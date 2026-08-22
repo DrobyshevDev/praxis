@@ -1,6 +1,6 @@
 import pytest
 
-from praxis.tasks import court_fee, penalty
+from praxis.tasks import court_fee, interest_395, penalty
 
 
 # --- Неустойка --------------------------------------------------------------
@@ -73,3 +73,30 @@ def test_consumer_over_1m_pays_difference():
 def test_court_fee_rejects_negative():
     with pytest.raises(ValueError):
         court_fee(-1)
+
+
+# --- Проценты по ст. 395 ГК -------------------------------------------------
+
+def test_interest_395_basic():
+    # 100 000 × 16% × 365/365 = 16 000
+    r = interest_395(100_000, 16, 365)
+    assert r.amount == 16_000
+    assert "ст. 395 ГК РФ" in r.basis.citation
+    assert r.basis.source_url == "https://www.zakonrf.info/gk/395/"
+
+
+def test_interest_395_partial_period():
+    # 200 000 × 10% × 30/365 = 1643.84
+    r = interest_395(200_000, 10, 30)
+    assert r.amount == round(200_000 * 0.10 * 30 / 365, 2)
+
+
+def test_interest_395_zero_days():
+    assert interest_395(50_000, 16, 0).amount == 0
+
+
+def test_interest_395_rejects_bad_input():
+    with pytest.raises(ValueError):
+        interest_395(0, 16, 30)
+    with pytest.raises(ValueError):
+        interest_395(1000, -1, 30)

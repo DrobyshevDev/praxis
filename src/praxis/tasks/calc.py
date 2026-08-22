@@ -39,6 +39,13 @@ class FeeResult:
     breakdown: str
 
 
+@dataclass
+class InterestResult:
+    amount: float  # проценты, ₽
+    basis: CalcBasis
+    breakdown: str
+
+
 def _rub(x: float) -> float:
     """Госпошлина исчисляется в полных рублях (НК ст. 52 п. 6)."""
     return float(int(x + 0.5))
@@ -83,6 +90,33 @@ def penalty(price: float, days: int, kind: str = "товар") -> PenaltyResult:
         amount=round(amount, 2), per_day=round(per_day, 2), days=days,
         rate_pct=rate * 100, capped=capped, basis=basis, breakdown=bd.replace(",", " "),
     )
+
+
+# --- Проценты за пользование чужими средствами (ст. 395 ГК) ------------------
+
+def interest_395(principal: float, rate_pct: float, days: int) -> InterestResult:
+    """Проценты по ст. 395 ГК за один период с неизменной ставкой.
+
+    Ставку (ключевую ставку Банка России) вводит пользователь: она регулярно
+    меняется, поэтому не зашита в код — иначе расчёт молча устаревал бы. Формула:
+    сумма × ставка × дни / 365. Если за время просрочки ставка менялась,
+    посчитайте по каждому периоду отдельно и сложите.
+    """
+    if principal <= 0:
+        raise ValueError("Сумма долга должна быть больше нуля")
+    if rate_pct < 0:
+        raise ValueError("Ставка не может быть отрицательной")
+    if days < 0:
+        raise ValueError("Число дней не может быть отрицательным")
+
+    amount = principal * (rate_pct / 100) * days / 365
+    basis = CalcBasis(
+        "ст. 395 ГК РФ", verify_url("gk-rf", "395"),
+        "Ставка — ключевая ставка Банка России (cbr.ru) за период просрочки. При смене "
+        "ставки считайте по каждому периоду и складывайте.",
+    )
+    bd = f"{principal:,.0f} ₽ × {rate_pct:g}% × {days} дн. / 365 = {amount:,.2f} ₽".replace(",", " ")
+    return InterestResult(amount=round(amount, 2), basis=basis, breakdown=bd)
 
 
 # --- Госпошлина в суд общей юрисдикции (имущественный иск) -------------------

@@ -99,6 +99,18 @@ class FeeOut(BaseModel):
     basis: BasisOut
 
 
+class InterestRequest(BaseModel):
+    principal: float = Field(..., gt=0, description="Сумма долга, ₽")
+    rate_pct: float = Field(..., ge=0, le=1000, description="Ключевая ставка ЦБ, % годовых")
+    days: int = Field(..., ge=0, le=100_000, description="Дней просрочки")
+
+
+class InterestOut(BaseModel):
+    amount: float
+    breakdown: str
+    basis: BasisOut
+
+
 class SearchHit(BaseModel):
     citation: str
     article_title: str

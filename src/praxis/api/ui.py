@@ -214,6 +214,18 @@ details pre{white-space:pre-wrap;color:var(--muted);font-size:13px;line-height:1
         </div>
         <div class="calcout" id="feeOut"></div>
       </div>
+      <div class="calccard">
+        <div class="calct">Проценты по ст. 395 ГК</div>
+        <div class="calcrow">
+          <input id="inPrin" type="number" min="0" placeholder="сумма долга, ₽">
+          <input id="inRate" type="number" min="0" step="0.01" placeholder="ставка ЦБ, %">
+        </div>
+        <div class="calcrow">
+          <input id="inDays" type="number" min="0" placeholder="дней просрочки">
+          <button id="inBtn" type="button">Рассчитать</button>
+        </div>
+        <div class="calcout" id="inOut"></div>
+      </div>
     </div>
   </details>
 
@@ -357,6 +369,15 @@ document.getElementById('feeBtn').onclick=async()=>{
   if(!d)return;
   const head=d.exempt?'0 ₽ — освобождён':rub(d.fee);
   out.innerHTML=`<div class="calc-amt">${esc(head)}</div><div class="calc-bd">${esc(d.breakdown)}</div>`+basisHtml(d.basis);
+};
+document.getElementById('inBtn').onclick=async()=>{
+  const principal=parseFloat(document.getElementById('inPrin').value),
+    rate_pct=parseFloat(document.getElementById('inRate').value),
+    days=parseInt(document.getElementById('inDays').value),out=document.getElementById('inOut');
+  if(!(principal>0)||!(rate_pct>=0)||!(days>=0)){out.innerHTML='<div class="calc-err">Введите сумму, ставку и дни.</div>';return;}
+  const d=await calcPost('/v1/interest',{principal,rate_pct,days},out);
+  if(!d)return;
+  out.innerHTML=`<div class="calc-amt">${rub(d.amount)}</div><div class="calc-bd">${esc(d.breakdown)}</div>`+basisHtml(d.basis);
 };
 fetch('/v1/stats').then(r=>r.json()).then(s=>{
   corpus.innerHTML=`<span>${s.provisions.toLocaleString('ru')} норм · ${s.acts} кодексов</span>`+
