@@ -92,6 +92,28 @@ check.
 **Measured quality.** recall@k, MRR and citation precision are computed on a golden set,
 not judged by eye.
 
+## Legal tools
+
+On top of search, practical tasks that turn an answer into action. Everything is grounded in
+the law: documents quote the provisions found verbatim, and calculators and checklist items
+each carry a link to the article they rest on.
+
+- **Trust layer.** Every provision has a "verify against the current revision" link
+  (zakonrf.info) and the act's details (federal-law number and date). On low confidence it
+  says "no direct answer was found" instead of a stretched answer.
+- **Pre-court claim and statement of claim** (`/v1/claim`, `/v1/lawsuit`), assembled from the
+  cited provisions; demands, jurisdiction and the court fee are statutory blocks.
+- **Calculators** with a link to the norm (`/v1/penalty`, `/v1/fee`, `/v1/interest`): consumer
+  penalty (art. 23 / 28 ZoZPP), court fee (art. 333.19 / 333.36 of the Tax Code), interest
+  under art. 395 of the Civil Code.
+- **Contract checklist** (`/v1/contract`) — a transparent check of essential terms and risky
+  clauses against the law: explicit rules, each with a link, not "AI analysis".
+
+The Consumer Protection Act (`corpus/zozpp.json`) was added to the corpus. The calculators and
+the checklist run entirely in the browser — try them without installing at
+**[drobyshevdev.github.io/praxis/try](https://drobyshevdev.github.io/praxis/try/)**. Endpoints
+and examples — [docs/API.md](docs/API.md).
+
 ## Data
 
 The statutory data is available. Codes and federal laws are published in machine-readable

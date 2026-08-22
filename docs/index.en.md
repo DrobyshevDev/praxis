@@ -44,6 +44,29 @@ the applicable provisions verbatim with references, and an answer like that cann
 hallucinate. Synthesis through Claude is enabled by a key and passes the same
 per-sentence citation check.
 
+## Legal tools
+
+On top of search, practical tasks that turn an answer into action. Everything is grounded
+in the law: documents quote the provisions found, and calculators and checklist items each
+carry a link to the article they rest on.
+
+- **Trust layer.** Every provision has a "verify against the current revision" link
+  (zakonrf.info) and the act's details (federal-law number and date). On low confidence
+  it says "no direct answer was found" instead of a stretched answer.
+- **Pre-court claim and statement of claim** (`/v1/claim`, `/v1/lawsuit`). The legal basis
+  is assembled from the cited provisions; demands, jurisdiction and the court fee are
+  statutory blocks, the facts are placeholders.
+- **Calculators** with a link to the norm (`/v1/penalty`, `/v1/fee`, `/v1/interest`):
+  consumer penalty (art. 23 / 28 ZoZPP), court fee (art. 333.19 / 333.36 of the Tax Code),
+  interest under art. 395 of the Civil Code.
+- **Contract checklist** (`/v1/contract`) — a transparent check of essential terms and
+  risky clauses against the law: not "AI analysis" but explicit rules, each with a link.
+
+The Consumer Protection Act (`corpus/zozpp.json`) was added to the corpus — the key statute
+for consumer disputes these tasks rely on. The calculators and the checklist run entirely
+in the browser: try them without installing at
+**[drobyshevdev.github.io/praxis/try](https://drobyshevdev.github.io/praxis/try/)**.
+
 ## Quality
 
 The eval harness over the golden set (12 questions, `praxis-eval`):
@@ -79,6 +102,7 @@ Caselaw Access Project; that is the next pipeline rather than something already 
 
 ## Next
 
+- [Try in the browser](https://drobyshevdev.github.io/praxis/try/) — calculators and the contract checklist, no install.
 - [Public API](API.md) — the `/v1` endpoints, the response format, the Python client.
 - [Development](DEVELOPMENT.md) — running it locally and what CI checks.
 - [Comparison](COMPETITIVE.md) — where Praxis wins and where it does not.
