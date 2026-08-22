@@ -68,6 +68,7 @@ plugins:
             it rests on, each citation verified separately.
           nav_translations:
             Обзор: Overview
+            Демо в браузере: Try in browser
             Открытый API: Public API
             Разработка: Development
             Сравнение с альтернативами: Comparison
@@ -91,6 +92,9 @@ markdown_extensions:
 
 nav:
   - Обзор: index.md
+  # Интерактивная демка — отдельная статическая страница (docs/try/index.html),
+  # инструменты считаются в браузере. Внешний URL: mkdocs --strict не валидирует.
+  - Демо в браузере: https://drobyshevdev.github.io/praxis/try/
   - Открытый API: API.md
   - Разработка: DEVELOPMENT.md
   - Сравнение с альтернативами: COMPETITIVE.md
