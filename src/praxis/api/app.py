@@ -15,7 +15,7 @@ from .. import __version__
 from ..config import config_from_env
 from ..pipeline import build_pipeline
 from ..sources import act_reference, verify_url
-from ..tasks import build_claim, claim_applicable, court_fee, penalty
+from ..tasks import build_claim, build_lawsuit, claim_applicable, court_fee, penalty
 from .schemas import (
     AnswerOut,
     AskRequest,
@@ -137,6 +137,18 @@ def claim(req: ClaimRequest) -> ClaimOut:
         based_on=result.based_on,
         note=result.note,
         disclaimer=result.disclaimer,
+    )
+
+
+@v1.post("/lawsuit", response_model=ClaimOut, summary="Собрать исковое заявление")
+def lawsuit(req: ClaimRequest) -> ClaimOut:
+    """Исковое заявление по вопросу: обоснование из найденных норм + просительная
+    часть, досудебный порядок, подсудность и госпошлина. Гражданско-потребительские
+    вопросы; для потребителя — требования по ЗоЗПП (неустойка, штраф, моральный вред)."""
+    result = build_lawsuit(get_pipeline().answer(req.question))
+    return ClaimOut(
+        applicable=result.applicable, text=result.text, based_on=result.based_on,
+        note=result.note, disclaimer=result.disclaimer,
     )
 
 

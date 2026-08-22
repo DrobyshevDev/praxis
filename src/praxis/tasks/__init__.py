@@ -4,12 +4,15 @@ from __future__ import annotations
 
 from .calc import FeeResult, PenaltyResult, court_fee, penalty
 from .claim import ClaimResult, build_claim, claim_applicable
+from .lawsuit import LawsuitResult, build_lawsuit
 
 __all__ = [
     "ClaimResult",
     "FeeResult",
+    "LawsuitResult",
     "PenaltyResult",
     "build_claim",
+    "build_lawsuit",
     "claim_applicable",
     "court_fee",
     "penalty",

@@ -96,6 +96,7 @@ a{color:var(--accent);text-decoration:none}
 .verify:hover{color:var(--accent);border-color:var(--accent)}
 .srcnote{color:var(--faint);font-size:12.5px;margin-top:16px;padding-top:12px;
   border-top:1px solid var(--line)}
+.docbtns{display:flex;gap:8px;flex-wrap:wrap}
 .mkclaim{font-size:14px;font-weight:600;color:var(--accent);background:transparent;
   border:1px solid var(--accent);border-radius:10px;padding:9px 16px;cursor:pointer;transition:all .15s}
 .mkclaim:hover{background:var(--accent);color:var(--accent-fg)}
@@ -278,8 +279,9 @@ function render(a){
     h+='<div class="srcnote">Тексты норм — из корпуса (транскрипция, Викитека) и могут отставать от действующей редакции. «Сверить» открывает текущий текст статьи на zakonrf.info.</div>';
   }
   if(a.claim_applicable){
-    h+=`<div class="sec-h">Документ <span class="n">на основе найденных норм</span></div>`;
-    h+='<button class="mkclaim" id="mkclaim">Составить претензию</button>';
+    h+=`<div class="sec-h">Документы <span class="n">на основе найденных норм</span></div>`;
+    h+='<div class="docbtns"><button class="mkclaim" id="mkclaim">Составить претензию</button>';
+    h+='<button class="mkclaim" id="mklaw">Исковое заявление</button></div>';
     h+='<div id="claimbox"></div>';
   }
   if(a.related_cases&&a.related_cases.length){
@@ -295,24 +297,25 @@ function render(a){
   out.innerHTML=h;
   out.querySelectorAll('.copy').forEach(el=>el.onclick=()=>{navigator.clipboard.writeText(cites[+el.dataset.c]);
     el.textContent='скопировано';setTimeout(()=>el.textContent='копировать',1200);});
-  const mk=document.getElementById('mkclaim');
-  if(mk)mk.onclick=()=>makeClaim(a.question,mk);
+  const mk=document.getElementById('mkclaim'),ml=document.getElementById('mklaw');
+  if(mk)mk.onclick=()=>makeDoc('/v1/claim',a.question,mk,'претензию');
+  if(ml)ml.onclick=()=>makeDoc('/v1/lawsuit',a.question,ml,'исковое заявление');
 }
 
-async function makeClaim(question,btn){
+async function makeDoc(path,question,btn,label){
   btn.disabled=true;const box=document.getElementById('claimbox');
-  box.innerHTML='<div class="skel" style="margin-top:12px"><span class="spin"></span>Собираю претензию…</div>';
+  box.innerHTML='<div class="skel" style="margin-top:12px"><span class="spin"></span>Собираю '+label+'…</div>';
   try{
-    const r=await fetch('/v1/claim',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question})});
+    const r=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question})});
     const c=await r.json();
-    if(!c.applicable){box.innerHTML='<div class="claimnote">'+esc(c.note||'Претензия неприменима.')+'</div>';btn.disabled=false;return;}
+    if(!c.applicable){box.innerHTML='<div class="claimnote">'+esc(c.note||'Документ неприменим.')+'</div>';btn.disabled=false;return;}
     let hh='<div class="claimdoc">'+esc(c.text)+'</div>';
     hh+='<div style="margin-top:10px"><button class="copy" id="claimcopy">копировать текст</button></div>';
     hh+='<div class="claimnote">⚠ '+esc(c.disclaimer)+'</div>';
     box.innerHTML=hh;
     document.getElementById('claimcopy').onclick=()=>{navigator.clipboard.writeText(c.text);
       const b=document.getElementById('claimcopy');b.textContent='скопировано';setTimeout(()=>b.textContent='копировать текст',1200);};
-  }catch(e){box.innerHTML='<div class="warn">Не удалось собрать претензию.</div>';}
+  }catch(e){box.innerHTML='<div class="warn">Не удалось собрать документ.</div>';}
   btn.disabled=false;
 }
 
