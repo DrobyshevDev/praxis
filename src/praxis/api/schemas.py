@@ -111,6 +111,26 @@ class InterestOut(BaseModel):
     basis: BasisOut
 
 
+class ContractRequest(BaseModel):
+    text: str = Field(..., min_length=1, max_length=200_000)
+
+
+class ContractCheckOut(BaseModel):
+    label: str
+    status: str  # ok | missing | warning
+    citation: str
+    source_url: str | None = None
+    note: str
+
+
+class ContractReviewOut(BaseModel):
+    ok: bool
+    checks: list[ContractCheckOut] = []
+    summary: str = ""
+    note: str = ""
+    disclaimer: str = ""
+
+
 class SearchHit(BaseModel):
     citation: str
     article_title: str

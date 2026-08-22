@@ -148,6 +148,27 @@ details pre{white-space:pre-wrap;color:var(--muted);font-size:13px;line-height:1
 .calc-basis a{color:var(--muted)}
 .calc-err{color:var(--bad);font-size:13.5px}
 @media(max-width:620px){.calcgrid{grid-template-columns:1fr}}
+.contract{margin:12px 0 0}
+.contract>summary{cursor:pointer;color:var(--muted);font-size:14px;font-weight:600;list-style:none;
+  user-select:none;padding:10px 0;text-align:center}
+.contract>summary::-webkit-details-marker{display:none}
+.contract>summary::before{content:"📄 "}
+.contract textarea{width:100%;min-height:140px;border:1px solid var(--border);background:var(--surface);
+  color:var(--fg);border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.5;outline:none;
+  resize:vertical;font-family:var(--sans)}
+.contract textarea:focus{border-color:var(--accent)}
+.crow{display:flex;gap:10px;margin-top:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.crow button{border:0;border-radius:9px;background:var(--accent);color:var(--accent-fg);font-size:14px;
+  font-weight:600;padding:9px 18px;cursor:pointer;transition:opacity .15s}
+.crow button:hover{opacity:.9}
+.chk-sum{font-size:13.5px;color:var(--muted);margin:14px 0 4px;font-weight:600}
+.chk-item{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line)}
+.chk-ic{flex:none;width:20px;text-align:center;font-size:15px;font-weight:700}
+.chk-ok .chk-ic{color:var(--good)} .chk-miss .chk-ic{color:var(--warn)} .chk-warn .chk-ic{color:var(--bad)}
+.chk-label{font-weight:600;font-size:14.5px}
+.chk-note{color:var(--muted);font-size:13.5px;margin-top:2px}
+.chk-cite{font-size:12.5px;margin-top:3px;color:var(--faint)}
+.chk-cite a{color:var(--muted)}
 .foot{border-top:1px solid var(--line);margin-top:20px;padding:26px 0 60px;color:var(--faint);
   font-size:13px;text-align:center}
 .foot a{color:var(--muted)} .foot .leg{margin-top:8px;font-size:12px}
@@ -227,6 +248,16 @@ details pre{white-space:pre-wrap;color:var(--muted);font-size:13px;line-height:1
         <div class="calcout" id="inOut"></div>
       </div>
     </div>
+  </details>
+
+  <details class="contract" id="contract">
+    <summary>Проверка договора по чек-листу</summary>
+    <textarea id="ctText" placeholder="Вставьте текст договора — Praxis проверит существенные условия и рискованные пункты по нормам…"></textarea>
+    <div class="crow">
+      <span class="disc" style="margin:0">Прозрачная проверка по нормам — ориентир, не заменяет юриста.</span>
+      <button id="ctBtn" type="button">Проверить</button>
+    </div>
+    <div id="ctOut"></div>
   </details>
 
   <div class="out" id="out"></div>
@@ -378,6 +409,29 @@ document.getElementById('inBtn').onclick=async()=>{
   const d=await calcPost('/v1/interest',{principal,rate_pct,days},out);
   if(!d)return;
   out.innerHTML=`<div class="calc-amt">${rub(d.amount)}</div><div class="calc-bd">${esc(d.breakdown)}</div>`+basisHtml(d.basis);
+};
+
+// --- Чек-лист договора ---
+const CHK_IC={ok:'✓',missing:'—',warning:'⚠'},CHK_CL={ok:'chk-ok',missing:'chk-miss',warning:'chk-warn'};
+document.getElementById('ctBtn').onclick=async()=>{
+  const text=document.getElementById('ctText').value.trim(),out=document.getElementById('ctOut');
+  if(text.length<40){out.innerHTML='<div class="calc-err" style="margin-top:10px">Вставьте текст договора (не короче 40 символов).</div>';return;}
+  out.innerHTML='<div class="skel" style="margin-top:14px"><span class="spin"></span>Проверяю по чек-листу…</div>';
+  try{
+    const r=await fetch('/v1/contract',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})});
+    const d=await r.json();
+    if(!d.ok){out.innerHTML='<div class="calc-err" style="margin-top:10px">'+esc(d.note)+'</div>';return;}
+    let h='<div class="chk-sum">'+esc(d.summary)+'</div>';
+    for(const c of d.checks){
+      let cite=esc(c.citation);
+      if(c.source_url)cite=`<a href="${esc(c.source_url)}" target="_blank" rel="noopener">${cite} ↗</a>`;
+      h+=`<div class="chk-item ${CHK_CL[c.status]}"><div class="chk-ic">${CHK_IC[c.status]}</div><div class="chk-body">`+
+        `<div class="chk-label">${esc(c.label)}</div><div class="chk-note">${esc(c.note)}</div>`+
+        `<div class="chk-cite">Норма: ${cite}</div></div></div>`;
+    }
+    h+='<div class="claimnote">⚠ '+esc(d.disclaimer)+'</div>';
+    out.innerHTML=h;
+  }catch(e){out.innerHTML='<div class="warn" style="margin-top:10px">Не удалось проверить договор.</div>';}
 };
 fetch('/v1/stats').then(r=>r.json()).then(s=>{
   corpus.innerHTML=`<span>${s.provisions.toLocaleString('ru')} норм · ${s.acts} кодексов</span>`+

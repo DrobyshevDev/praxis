@@ -22,6 +22,7 @@ from ..tasks import (
     court_fee,
     interest_395,
     penalty,
+    review_contract,
 )
 from .schemas import (
     AnswerOut,
@@ -31,6 +32,9 @@ from .schemas import (
     CitationOut,
     ClaimOut,
     ClaimRequest,
+    ContractCheckOut,
+    ContractRequest,
+    ContractReviewOut,
     FeeOut,
     FeeRequest,
     InterestOut,
@@ -188,6 +192,22 @@ def calc_fee(req: FeeRequest) -> FeeOut:
     return FeeOut(
         fee=r.fee, exempt=r.exempt, breakdown=r.breakdown,
         basis=BasisOut(citation=r.basis.citation, source_url=r.basis.source_url, note=r.basis.note),
+    )
+
+
+@v1.post("/contract", response_model=ContractReviewOut, summary="Чек-лист договора")
+def contract(req: ContractRequest) -> ContractReviewOut:
+    """Проверка текста договора по нормам: существенные условия и рискованные пункты,
+    каждый со ссылкой на статью. Прозрачные правила, не заменяет юриста."""
+    r = review_contract(req.text)
+    return ContractReviewOut(
+        ok=r.ok,
+        checks=[
+            ContractCheckOut(label=c.label, status=c.status, citation=c.citation,
+                             source_url=c.source_url, note=c.note)
+            for c in r.checks
+        ],
+        summary=r.summary, note=r.note, disclaimer=r.disclaimer,
     )
 
 

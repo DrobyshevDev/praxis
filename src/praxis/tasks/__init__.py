@@ -11,10 +11,13 @@ from .calc import (
     penalty,
 )
 from .claim import ClaimResult, build_claim, claim_applicable
+from .contract import ContractCheck, ContractReview, review_contract
 from .lawsuit import LawsuitResult, build_lawsuit
 
 __all__ = [
     "ClaimResult",
+    "ContractCheck",
+    "ContractReview",
     "FeeResult",
     "InterestResult",
     "LawsuitResult",
@@ -25,4 +28,5 @@ __all__ = [
     "court_fee",
     "interest_395",
     "penalty",
+    "review_contract",
 ]
