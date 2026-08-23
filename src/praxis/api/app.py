@@ -7,18 +7,40 @@ ML-специалистов. CORS открыт (API только на чтени
 
 from __future__ import annotations
 
-from fastapi import APIRouter, FastAPI
+from fastapi import APIRouter, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 
 from .. import __version__
 from ..config import config_from_env
 from ..pipeline import build_pipeline
+from ..sources import act_reference, verify_url
+from ..tasks import (
+    build_claim,
+    build_lawsuit,
+    claim_applicable,
+    court_fee,
+    interest_395,
+    penalty,
+    review_contract,
+)
 from .schemas import (
     AnswerOut,
     AskRequest,
+    BasisOut,
     CaseOut,
     CitationOut,
+    ClaimOut,
+    ClaimRequest,
+    ContractCheckOut,
+    ContractRequest,
+    ContractReviewOut,
+    FeeOut,
+    FeeRequest,
+    InterestOut,
+    InterestRequest,
+    PenaltyOut,
+    PenaltyRequest,
     SearchHit,
     SearchRequest,
     StatsOut,
@@ -88,6 +110,8 @@ def ask(req: AskRequest) -> AnswerOut:
             text=c.provision.text,
             verdict=verdict_by_id.get(c.provision.id),
             span=list(c.span) if c.span else None,
+            source_url=verify_url(c.provision.act.id, c.provision.article_number),
+            act_ref=act_reference(c.provision.act.number, c.provision.act.date),
         )
         for c in answer.citations
     ]
@@ -110,6 +134,94 @@ def ask(req: AskRequest) -> AnswerOut:
         unverified_claims=answer.unverified_claims,
         steps=answer.steps,
         related_cases=cases,
+        claim_applicable=claim_applicable(answer),
+    )
+
+
+@v1.post("/claim", response_model=ClaimOut, summary="Собрать досудебную претензию")
+def claim(req: ClaimRequest) -> ClaimOut:
+    """Готовая претензия по вопросу: обоснование из найденных норм + статутные блоки,
+    факты — плейсхолдеры. Применимо к гражданско-потребительским вопросам."""
+    answer = get_pipeline().answer(req.question)
+    result = build_claim(answer)
+    return ClaimOut(
+        applicable=result.applicable,
+        text=result.text,
+        based_on=result.based_on,
+        note=result.note,
+        disclaimer=result.disclaimer,
+    )
+
+
+@v1.post("/lawsuit", response_model=ClaimOut, summary="Собрать исковое заявление")
+def lawsuit(req: ClaimRequest) -> ClaimOut:
+    """Исковое заявление по вопросу: обоснование из найденных норм + просительная
+    часть, досудебный порядок, подсудность и госпошлина. Гражданско-потребительские
+    вопросы; для потребителя — требования по ЗоЗПП (неустойка, штраф, моральный вред)."""
+    result = build_lawsuit(get_pipeline().answer(req.question))
+    return ClaimOut(
+        applicable=result.applicable, text=result.text, based_on=result.based_on,
+        note=result.note, disclaimer=result.disclaimer,
+    )
+
+
+@v1.post("/penalty", response_model=PenaltyOut, summary="Калькулятор неустойки (ЗоЗПП)")
+def calc_penalty(req: PenaltyRequest) -> PenaltyOut:
+    """Неустойка потребителю за просрочку: товар 1%/день (ст. 23 ЗоЗПП),
+    услуга 3%/день с потолком в цену услуги (ст. 28 ЗоЗПП)."""
+    try:
+        r = penalty(req.price, req.days, kind=req.kind)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    return PenaltyOut(
+        amount=r.amount, per_day=r.per_day, days=r.days, rate_pct=r.rate_pct,
+        capped=r.capped, breakdown=r.breakdown,
+        basis=BasisOut(citation=r.basis.citation, source_url=r.basis.source_url, note=r.basis.note),
+    )
+
+
+@v1.post("/fee", response_model=FeeOut, summary="Калькулятор госпошлины (НК РФ)")
+def calc_fee(req: FeeRequest) -> FeeOut:
+    """Госпошлина при подаче имущественного иска в суд общей юрисдикции
+    (ст. 333.19 НК, ред. 259-ФЗ). Для исков о защите прав потребителей —
+    льгота ст. 333.36 НК (до 1 000 000 ₽ пошлина не уплачивается)."""
+    try:
+        r = court_fee(req.amount, consumer=req.consumer)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    return FeeOut(
+        fee=r.fee, exempt=r.exempt, breakdown=r.breakdown,
+        basis=BasisOut(citation=r.basis.citation, source_url=r.basis.source_url, note=r.basis.note),
+    )
+
+
+@v1.post("/contract", response_model=ContractReviewOut, summary="Чек-лист договора")
+def contract(req: ContractRequest) -> ContractReviewOut:
+    """Проверка текста договора по нормам: существенные условия и рискованные пункты,
+    каждый со ссылкой на статью. Прозрачные правила, не заменяет юриста."""
+    r = review_contract(req.text)
+    return ContractReviewOut(
+        ok=r.ok,
+        checks=[
+            ContractCheckOut(label=c.label, status=c.status, citation=c.citation,
+                             source_url=c.source_url, note=c.note)
+            for c in r.checks
+        ],
+        summary=r.summary, note=r.note, disclaimer=r.disclaimer,
+    )
+
+
+@v1.post("/interest", response_model=InterestOut, summary="Калькулятор процентов (ст. 395 ГК)")
+def calc_interest(req: InterestRequest) -> InterestOut:
+    """Проценты за пользование чужими денежными средствами (ст. 395 ГК) за период с
+    неизменной ключевой ставкой ЦБ (ставку задаёт пользователь: она регулярно меняется)."""
+    try:
+        r = interest_395(req.principal, req.rate_pct, req.days)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    return InterestOut(
+        amount=r.amount, breakdown=r.breakdown,
+        basis=BasisOut(citation=r.basis.citation, source_url=r.basis.source_url, note=r.basis.note),
     )
 
 

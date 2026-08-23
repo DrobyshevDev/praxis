@@ -75,6 +75,31 @@ def clean_wikitext(wt: str) -> str:
     return "\n".join(lines)
 
 
+def fetch_page_act(
+    page_title: str,
+    *,
+    id: str,
+    title: str,
+    short_title: str,
+    kind: ActKind = ActKind.FEDERAL_LAW,
+    number: str | None = None,
+    date: str | None = None,
+    edition: str | None = None,
+) -> RawAct:
+    """Акт, размещённый одной страницей (ФЗ без глав-подстраниц, напр. ЗоЗПП)."""
+    text = clean_wikitext(fetch_wikitext(page_title))
+    return parse_statute_text(
+        text,
+        id=id,
+        title=title,
+        short_title=short_title,
+        kind=kind,
+        number=number,
+        date=date,
+        edition=edition,
+    )
+
+
 def fetch_code(
     chapter_prefix: str,
     *,

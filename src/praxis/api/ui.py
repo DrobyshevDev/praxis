@@ -81,14 +81,29 @@ a{color:var(--accent);text-decoration:none}
 .cite:hover{border-color:color-mix(in srgb,var(--accent) 40%,var(--border))}
 .cite .head{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
 .cite .num{font-weight:650;font-size:15px}
+.cite .reqs{color:var(--faint);font-size:12px;white-space:nowrap}
 .cite .title{color:var(--muted);font-size:14px}
 .verdict{font-size:11.5px;font-weight:700;border-radius:6px;padding:2px 8px}
 .v-ok{color:var(--good);background:var(--good-bg)} .v-no{color:var(--bad);background:var(--bad-bg)}
 .v-q{color:var(--muted);background:var(--line)}
 .cite .txt{color:var(--fg);font-size:14.5px;line-height:1.65;margin-top:9px}
-.copy{margin-left:auto;font-size:12px;color:var(--faint);background:transparent;border:1px solid var(--border);
+.acts{margin-left:auto;display:flex;gap:8px;align-items:center}
+.copy{font-size:12px;color:var(--faint);background:transparent;border:1px solid var(--border);
   border-radius:8px;padding:3px 10px;cursor:pointer;transition:all .15s}
 .copy:hover{color:var(--fg);border-color:var(--accent)}
+.verify{font-size:12px;color:var(--muted);border:1px solid var(--border);border-radius:8px;
+  padding:3px 10px;white-space:nowrap;transition:all .15s}
+.verify:hover{color:var(--accent);border-color:var(--accent)}
+.srcnote{color:var(--faint);font-size:12.5px;margin-top:16px;padding-top:12px;
+  border-top:1px solid var(--line)}
+.docbtns{display:flex;gap:8px;flex-wrap:wrap}
+.mkclaim{font-size:14px;font-weight:600;color:var(--accent);background:transparent;
+  border:1px solid var(--accent);border-radius:10px;padding:9px 16px;cursor:pointer;transition:all .15s}
+.mkclaim:hover{background:var(--accent);color:var(--accent-fg)}
+.mkclaim:disabled{opacity:.55;cursor:default}
+.claimdoc{white-space:pre-wrap;font-size:14px;line-height:1.7;background:var(--line);
+  border-radius:10px;padding:16px 18px;margin-top:12px}
+.claimnote{color:var(--muted);font-size:13px;margin-top:10px}
 mark{background:color-mix(in srgb,var(--accent) 22%,transparent);color:inherit;border-radius:3px;
   padding:0 2px;box-decoration-break:clone}
 .case{border-left:3px solid var(--accent);background:var(--line);border-radius:0 10px 10px 0;
@@ -109,6 +124,51 @@ details pre{white-space:pre-wrap;color:var(--muted);font-size:13px;line-height:1
 .spin{width:15px;height:15px;border:2px solid var(--line);border-top-color:var(--accent);
   border-radius:50%;animation:s .7s linear infinite}
 @keyframes s{to{transform:rotate(360deg)}}
+.calc{margin:20px 0 0}
+.calc>summary{cursor:pointer;color:var(--muted);font-size:14px;font-weight:600;list-style:none;
+  user-select:none;padding:10px 0;text-align:center}
+.calc>summary::-webkit-details-marker{display:none}
+.calc>summary::before{content:"🧮 "}
+.calcgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:6px}
+.calccard{background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  box-shadow:var(--shadow);padding:16px 18px}
+.calct{font-family:var(--serif);font-size:16px;font-weight:600;margin-bottom:12px}
+.calcrow{display:flex;gap:8px;margin-bottom:8px;align-items:center;flex-wrap:wrap}
+.calccard input[type=number],.calccard select{flex:1;min-width:0;border:1px solid var(--border);
+  background:var(--bg);color:var(--fg);border-radius:9px;padding:9px 11px;font-size:14px;outline:none}
+.calccard input:focus,.calccard select:focus{border-color:var(--accent)}
+.calccard .chk{flex:1;display:flex;align-items:center;gap:7px;font-size:13.5px;color:var(--muted);cursor:pointer}
+.calccard button{border:0;border-radius:9px;background:var(--accent);color:var(--accent-fg);
+  font-size:14px;font-weight:600;padding:9px 16px;cursor:pointer;transition:opacity .15s;white-space:nowrap}
+.calccard button:hover{opacity:.9}
+.calcout{margin-top:8px;min-height:1px}
+.calc-amt{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+.calc-bd{color:var(--muted);font-size:13px;margin-top:3px}
+.calc-basis{font-size:12.5px;margin-top:8px;padding-top:8px;border-top:1px solid var(--line);color:var(--faint)}
+.calc-basis a{color:var(--muted)}
+.calc-err{color:var(--bad);font-size:13.5px}
+@media(max-width:620px){.calcgrid{grid-template-columns:1fr}}
+.contract{margin:12px 0 0}
+.contract>summary{cursor:pointer;color:var(--muted);font-size:14px;font-weight:600;list-style:none;
+  user-select:none;padding:10px 0;text-align:center}
+.contract>summary::-webkit-details-marker{display:none}
+.contract>summary::before{content:"📄 "}
+.contract textarea{width:100%;min-height:140px;border:1px solid var(--border);background:var(--surface);
+  color:var(--fg);border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.5;outline:none;
+  resize:vertical;font-family:var(--sans)}
+.contract textarea:focus{border-color:var(--accent)}
+.crow{display:flex;gap:10px;margin-top:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.crow button{border:0;border-radius:9px;background:var(--accent);color:var(--accent-fg);font-size:14px;
+  font-weight:600;padding:9px 18px;cursor:pointer;transition:opacity .15s}
+.crow button:hover{opacity:.9}
+.chk-sum{font-size:13.5px;color:var(--muted);margin:14px 0 4px;font-weight:600}
+.chk-item{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line)}
+.chk-ic{flex:none;width:20px;text-align:center;font-size:15px;font-weight:700}
+.chk-ok .chk-ic{color:var(--good)} .chk-miss .chk-ic{color:var(--warn)} .chk-warn .chk-ic{color:var(--bad)}
+.chk-label{font-weight:600;font-size:14.5px}
+.chk-note{color:var(--muted);font-size:13.5px;margin-top:2px}
+.chk-cite{font-size:12.5px;margin-top:3px;color:var(--faint)}
+.chk-cite a{color:var(--muted)}
 .foot{border-top:1px solid var(--line);margin-top:20px;padding:26px 0 60px;color:var(--faint);
   font-size:13px;text-align:center}
 .foot a{color:var(--muted)} .foot .leg{margin-top:8px;font-size:12px}
@@ -146,6 +206,60 @@ details pre{white-space:pre-wrap;color:var(--muted);font-size:13px;line-height:1
     <div class="chips" id="hist" style="justify-content:flex-start"></div>
   </div>
 
+  <details class="calc" id="calc">
+    <summary>Калькуляторы: неустойка и госпошлина</summary>
+    <div class="calcgrid">
+      <div class="calccard">
+        <div class="calct">Неустойка потребителю</div>
+        <div class="calcrow">
+          <input id="npPrice" type="number" min="0" placeholder="цена, ₽">
+          <input id="npDays" type="number" min="0" placeholder="дней просрочки">
+        </div>
+        <div class="calcrow">
+          <select id="npKind">
+            <option value="товар">товар — 1%/день</option>
+            <option value="услуга">услуга/работа — 3%/день</option>
+          </select>
+          <button id="npBtn" type="button">Рассчитать</button>
+        </div>
+        <div class="calcout" id="npOut"></div>
+      </div>
+      <div class="calccard">
+        <div class="calct">Госпошлина в суд</div>
+        <div class="calcrow">
+          <input id="feeAmt" type="number" min="0" placeholder="цена иска, ₽">
+        </div>
+        <div class="calcrow">
+          <label class="chk"><input id="feeCons" type="checkbox">иск о защите прав потребителя</label>
+          <button id="feeBtn" type="button">Рассчитать</button>
+        </div>
+        <div class="calcout" id="feeOut"></div>
+      </div>
+      <div class="calccard">
+        <div class="calct">Проценты по ст. 395 ГК</div>
+        <div class="calcrow">
+          <input id="inPrin" type="number" min="0" placeholder="сумма долга, ₽">
+          <input id="inRate" type="number" min="0" step="0.01" placeholder="ставка ЦБ, %">
+        </div>
+        <div class="calcrow">
+          <input id="inDays" type="number" min="0" placeholder="дней просрочки">
+          <button id="inBtn" type="button">Рассчитать</button>
+        </div>
+        <div class="calcout" id="inOut"></div>
+      </div>
+    </div>
+  </details>
+
+  <details class="contract" id="contract">
+    <summary>Проверка договора по чек-листу</summary>
+    <textarea id="ctText" placeholder="Вставьте текст договора — Praxis проверит существенные условия и рискованные пункты по нормам…"></textarea>
+    <div class="crow">
+      <span class="disc" style="margin:0">Прозрачная проверка по нормам — ориентир, не заменяет юриста.</span>
+      <button id="ctBtn" type="button">Проверить</button>
+    </div>
+    <div id="ctOut"></div>
+  </details>
+
   <div class="out" id="out"></div>
 </div>
 
@@ -162,7 +276,7 @@ const q=document.getElementById('q'),b=document.getElementById('b'),out=document
 const VMAP={"подтверждает":["v-ok","✓ подтверждает"],"не относится":["v-q","? релевантна"],
   "противоречит":["v-no","✗ противоречит"]};
 const COLORS={"ГК РФ":"#2649c9","УК РФ":"#c0392b","НК РФ":"#0f7a52","ТК РФ":"#c26a1b",
-  "КоАП РФ":"#7c4dbd","ЖК РФ":"#0e8a8a"};
+  "КоАП РФ":"#7c4dbd","ЖК РФ":"#0e8a8a","ЗоЗПП":"#c2185b"};
 const EXAMPLES=["что грозит за мошенничество","можно ли расторгнуть договор через суд",
   "как уволить сотрудника за прогул","за какое нарушение ПДД лишают прав",
   "что такое злоупотребление правом","в каком размере возмещаются убытки"];
@@ -197,11 +311,21 @@ function render(a){
       h+='<div class="cite"><div class="head">';
       h+=`<span class="badge" style="background:${color(c.code)}">${esc(c.code||'')}</span>`;
       h+=`<span class="num">${esc(c.citation)}</span>`;
+      if(c.act_ref)h+=`<span class="reqs">· ${esc(c.act_ref)}</span>`;
       if(v)h+=`<span class="verdict ${v[0]}">${v[1]}</span>`;
-      h+=`<button class="copy" data-c="${i}">копировать</button></div>`;
+      h+='<span class="acts">';
+      if(c.source_url)h+=`<a class="verify" href="${esc(c.source_url)}" target="_blank" rel="noopener" title="Открыть действующую редакцию статьи">сверить ↗</a>`;
+      h+=`<button class="copy" data-c="${i}">копировать</button></span></div>`;
       h+=`<div class="title">${esc(c.article_title)}</div>`;
       h+=`<div class="txt">${hl(c.text,c.span)}</div></div>`;
     }
+    h+='<div class="srcnote">Тексты норм — из корпуса (транскрипция, Викитека) и могут отставать от действующей редакции. «Сверить» открывает текущий текст статьи на zakonrf.info.</div>';
+  }
+  if(a.claim_applicable){
+    h+=`<div class="sec-h">Документы <span class="n">на основе найденных норм</span></div>`;
+    h+='<div class="docbtns"><button class="mkclaim" id="mkclaim">Составить претензию</button>';
+    h+='<button class="mkclaim" id="mklaw">Исковое заявление</button></div>';
+    h+='<div id="claimbox"></div>';
   }
   if(a.related_cases&&a.related_cases.length){
     h+=`<div class="sec-h">Судебная практика <span class="n">по этим нормам</span></div>`;
@@ -216,6 +340,26 @@ function render(a){
   out.innerHTML=h;
   out.querySelectorAll('.copy').forEach(el=>el.onclick=()=>{navigator.clipboard.writeText(cites[+el.dataset.c]);
     el.textContent='скопировано';setTimeout(()=>el.textContent='копировать',1200);});
+  const mk=document.getElementById('mkclaim'),ml=document.getElementById('mklaw');
+  if(mk)mk.onclick=()=>makeDoc('/v1/claim',a.question,mk,'претензию');
+  if(ml)ml.onclick=()=>makeDoc('/v1/lawsuit',a.question,ml,'исковое заявление');
+}
+
+async function makeDoc(path,question,btn,label){
+  btn.disabled=true;const box=document.getElementById('claimbox');
+  box.innerHTML='<div class="skel" style="margin-top:12px"><span class="spin"></span>Собираю '+label+'…</div>';
+  try{
+    const r=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question})});
+    const c=await r.json();
+    if(!c.applicable){box.innerHTML='<div class="claimnote">'+esc(c.note||'Документ неприменим.')+'</div>';btn.disabled=false;return;}
+    let hh='<div class="claimdoc">'+esc(c.text)+'</div>';
+    hh+='<div style="margin-top:10px"><button class="copy" id="claimcopy">копировать текст</button></div>';
+    hh+='<div class="claimnote">⚠ '+esc(c.disclaimer)+'</div>';
+    box.innerHTML=hh;
+    document.getElementById('claimcopy').onclick=()=>{navigator.clipboard.writeText(c.text);
+      const b=document.getElementById('claimcopy');b.textContent='скопировано';setTimeout(()=>b.textContent='копировать текст',1200);};
+  }catch(e){box.innerHTML='<div class="warn">Не удалось собрать документ.</div>';}
+  btn.disabled=false;
 }
 
 function saveHist(x){let h=JSON.parse(localStorage.getItem('praxis_hist')||'[]');
@@ -228,6 +372,67 @@ function renderHist(){const h=JSON.parse(localStorage.getItem('praxis_hist')||'[
 examples.innerHTML=EXAMPLES.map(x=>`<span class="chip">${esc(x)}</span>`).join('');
 examples.querySelectorAll('.chip').forEach((el,i)=>el.onclick=()=>{q.value=EXAMPLES[i];ask();});
 renderHist();
+
+// --- Калькуляторы ---
+function rub(x){return (Math.round(x*100)/100).toLocaleString('ru')+' ₽';}
+function basisHtml(b){let s=esc(b.citation);
+  if(b.source_url)s=`<a href="${esc(b.source_url)}" target="_blank" rel="noopener">${s} ↗</a>`;
+  return `<div class="calc-basis">Основание: ${s}. ${esc(b.note||'')}</div>`;}
+async function calcPost(path,body,outEl){
+  outEl.innerHTML='<div class="calc-bd">…</div>';
+  try{const r=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    if(!r.ok){const e=await r.json().catch(()=>({}));outEl.innerHTML='<div class="calc-err">'+esc(e.detail||'Проверьте ввод')+'</div>';return null;}
+    return await r.json();
+  }catch(e){outEl.innerHTML='<div class="calc-err">Не удалось рассчитать.</div>';return null;}
+}
+document.getElementById('npBtn').onclick=async()=>{
+  const price=parseFloat(document.getElementById('npPrice').value),days=parseInt(document.getElementById('npDays').value),
+    out=document.getElementById('npOut');
+  if(!(price>0)||!(days>=0)){out.innerHTML='<div class="calc-err">Введите цену и число дней.</div>';return;}
+  const d=await calcPost('/v1/penalty',{price,days,kind:document.getElementById('npKind').value},out);
+  if(!d)return;
+  out.innerHTML=`<div class="calc-amt">${rub(d.amount)}</div><div class="calc-bd">${esc(d.breakdown)}${d.capped?' · достигнут потолок':''}</div>`+basisHtml(d.basis);
+};
+document.getElementById('feeBtn').onclick=async()=>{
+  const amount=parseFloat(document.getElementById('feeAmt').value),out=document.getElementById('feeOut');
+  if(!(amount>=0)){out.innerHTML='<div class="calc-err">Введите цену иска.</div>';return;}
+  const d=await calcPost('/v1/fee',{amount,consumer:document.getElementById('feeCons').checked},out);
+  if(!d)return;
+  const head=d.exempt?'0 ₽ — освобождён':rub(d.fee);
+  out.innerHTML=`<div class="calc-amt">${esc(head)}</div><div class="calc-bd">${esc(d.breakdown)}</div>`+basisHtml(d.basis);
+};
+document.getElementById('inBtn').onclick=async()=>{
+  const principal=parseFloat(document.getElementById('inPrin').value),
+    rate_pct=parseFloat(document.getElementById('inRate').value),
+    days=parseInt(document.getElementById('inDays').value),out=document.getElementById('inOut');
+  if(!(principal>0)||!(rate_pct>=0)||!(days>=0)){out.innerHTML='<div class="calc-err">Введите сумму, ставку и дни.</div>';return;}
+  const d=await calcPost('/v1/interest',{principal,rate_pct,days},out);
+  if(!d)return;
+  out.innerHTML=`<div class="calc-amt">${rub(d.amount)}</div><div class="calc-bd">${esc(d.breakdown)}</div>`+basisHtml(d.basis);
+};
+
+// --- Чек-лист договора ---
+const CHK_IC={ok:'✓',missing:'—',warning:'⚠'},CHK_CL={ok:'chk-ok',missing:'chk-miss',warning:'chk-warn'};
+document.getElementById('ctBtn').onclick=async()=>{
+  const text=document.getElementById('ctText').value.trim(),out=document.getElementById('ctOut');
+  if(text.length<40){out.innerHTML='<div class="calc-err" style="margin-top:10px">Вставьте текст договора (не короче 40 символов).</div>';return;}
+  out.innerHTML='<div class="skel" style="margin-top:14px"><span class="spin"></span>Проверяю по чек-листу…</div>';
+  try{
+    const r=await fetch('/v1/contract',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})});
+    const d=await r.json();
+    if(!d.ok){out.innerHTML='<div class="calc-err" style="margin-top:10px">'+esc(d.note)+'</div>';return;}
+    let h='<div class="chk-sum">'+esc(d.summary)+'</div>';
+    for(const c of d.checks){
+      let cite=esc(c.citation);
+      if(c.source_url)cite=`<a href="${esc(c.source_url)}" target="_blank" rel="noopener">${cite} ↗</a>`;
+      h+=`<div class="chk-item ${CHK_CL[c.status]}"><div class="chk-ic">${CHK_IC[c.status]}</div><div class="chk-body">`+
+        `<div class="chk-label">${esc(c.label)}</div><div class="chk-note">${esc(c.note)}</div>`+
+        `<div class="chk-cite">Норма: ${cite}</div></div></div>`;
+    }
+    h+='<div class="claimnote">⚠ '+esc(d.disclaimer)+'</div>';
+    out.innerHTML=h;
+  }catch(e){out.innerHTML='<div class="warn" style="margin-top:10px">Не удалось проверить договор.</div>';}
+};
 fetch('/v1/stats').then(r=>r.json()).then(s=>{
   corpus.innerHTML=`<span>${s.provisions.toLocaleString('ru')} норм · ${s.acts} кодексов</span>`+
     s.codes.map(c=>`<span class="badge" style="background:${color(c)}">${esc(c)}</span>`).join('');
