@@ -1,7 +1,7 @@
 # «Скачал и запустил»: работает из коробки без токенов, ключей и GPU.
 # Офлайн-режим (детерминированные компоненты) + полный корпус ГК. Для продового
 # качества добавьте extra ml и GPU (см. docs/DEVELOPMENT.md).
-FROM python:3.12-slim
+FROM python:3.14-slim
 
 WORKDIR /app
 COPY pyproject.toml README.md ./
