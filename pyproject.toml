@@ -18,7 +18,7 @@ ml = [
 # API-слой и реальный индекс.
 api = [
     "fastapi>=0.110",
-    "uvicorn[standard]>=0.29",
+    "uvicorn[standard]>=0.52.4",
     "pydantic>=2.6",
     "psycopg[binary]>=3.1",
     "pgvector>=0.2",
