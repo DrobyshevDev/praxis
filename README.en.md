@@ -2,11 +2,37 @@
 
 [Русский](README.md) · **English** · [Documentation](https://drobyshevdev.github.io/praxis/)
 
+[![CI](https://github.com/DrobyshevDev/praxis/actions/workflows/ci.yml/badge.svg)](https://github.com/DrobyshevDev/praxis/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/DrobyshevDev/praxis/actions/workflows/codeql.yml/badge.svg)](https://github.com/DrobyshevDev/praxis/actions/workflows/codeql.yml)
+[![Licence: Apache-2.0](https://img.shields.io/badge/licence-Apache--2.0-blue)](LICENSE)
+[![Python 3.12](https://img.shields.io/badge/python-3.12-blue)](pyproject.toml)
+
 A legal assistant for Russian law. It answers a question and cites the specific
 provisions the answer rests on — each citation checked separately by a model. When the
 law does not support a claim, it says so.
 
 <img width="2048" height="1152" alt="Praxis answering a question with verified citations" src="https://github.com/user-attachments/assets/cd75be1d-3944-4d3f-bbbd-dba4c4d1c12f" />
+
+## Run it
+
+```bash
+git clone https://github.com/DrobyshevDev/praxis.git
+cd praxis
+docker compose up app
+```
+
+Open http://localhost:8077. No keys, no GPU, no network: the image installs the `api`
+extra, sets `PRAXIS_OFFLINE=1` and carries the corpus inside itself, so the
+deterministic components run without a single outbound request and the default answer
+is extractive — the text of the provisions themselves.
+
+That is the downloaded-and-ran slice, not production quality. Dense retrieval, the
+reranker and NLI citation checking need the `ml` extra and prefer a GPU;
+[docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) covers bringing those up. The synthesising
+mode is wired through `ANTHROPIC_API_KEY` and stays optional — retrieval works without
+it.
+
+The HTTP API and the Python client — [docs/API.md](docs/API.md).
 
 ## The problem
 
@@ -66,6 +92,28 @@ check.
 **Measured quality.** recall@k, MRR and citation precision are computed on a golden set,
 not judged by eye.
 
+## Legal tools
+
+On top of search, practical tasks that turn an answer into action. Everything is grounded in
+the law: documents quote the provisions found verbatim, and calculators and checklist items
+each carry a link to the article they rest on.
+
+- **Trust layer.** Every provision has a "verify against the current revision" link
+  (zakonrf.info) and the act's details (federal-law number and date). On low confidence it
+  says "no direct answer was found" instead of a stretched answer.
+- **Pre-court claim and statement of claim** (`/v1/claim`, `/v1/lawsuit`), assembled from the
+  cited provisions; demands, jurisdiction and the court fee are statutory blocks.
+- **Calculators** with a link to the norm (`/v1/penalty`, `/v1/fee`, `/v1/interest`): consumer
+  penalty (art. 23 / 28 ZoZPP), court fee (art. 333.19 / 333.36 of the Tax Code), interest
+  under art. 395 of the Civil Code.
+- **Contract checklist** (`/v1/contract`) — a transparent check of essential terms and risky
+  clauses against the law: explicit rules, each with a link, not "AI analysis".
+
+The Consumer Protection Act (`corpus/zozpp.json`) was added to the corpus. The calculators and
+the checklist run entirely in the browser — try them without installing at
+**[drobyshevdev.github.io/praxis/try](https://drobyshevdev.github.io/praxis/try/)**. Endpoints
+and examples — [docs/API.md](docs/API.md).
+
 ## Data
 
 The statutory data is available. Codes and federal laws are published in machine-readable
@@ -73,10 +121,25 @@ form at pravo.gov.ru, and that is what the main path is built on: the repository
 a parser for the official text (`statute_parser`) and a sample corpus of the Civil Code;
 the full corpus is loaded the same way.
 
-The full text of the Civil Code is already extracted into the repository
-(`corpus/gk-rf.json` — 1,712 articles, 4,717 provisions, all four parts, sourced from
-Wikisource) and is loaded through `PRAXIS_CORPUS_DIR`. The revision in force should be
-verified against pravo.gov.ru.
+Six codes ship in the repository and are loaded through `PRAXIS_CORPUS_DIR`:
+
+| File | Code |
+|---|---|
+| `corpus/gk-rf.json` | Civil — 1,712 articles, 4,717 provisions, all four parts |
+| `corpus/nk-rf.json` | Tax |
+| `corpus/koap-rf.json` | Administrative offences |
+| `corpus/uk-rf.json` | Criminal |
+| `corpus/tk-rf.json` | Labour |
+| `corpus/zhk-rf.json` | Housing |
+
+All six are transcriptions from Wikisource, as the `edition` field in each file states.
+The revision in force has to be checked against pravo.gov.ru — which is what the parser
+for the official text is in the repository for.
+
+The texts of the codes are official documents and, under article 1259(6) of the Civil
+Code, are not subject to copyright. Apache-2.0 in this repository covers the code, the
+parser, the cross-reference graph and the corpus markup, not the texts of the laws
+themselves.
 
 Judicial practice is harder. There is no open structured corpus for Russia comparable to
 the Caselaw Access Project, and kad.arbitr and the GAS "Pravosudie" system give up their

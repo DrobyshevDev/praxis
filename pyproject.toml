@@ -18,16 +18,16 @@ ml = [
 # API-слой и реальный индекс.
 api = [
     "fastapi>=0.110",
-    "uvicorn[standard]>=0.29",
-    "pydantic>=2.6",
+    "uvicorn[standard]>=0.52.4",
+    "pydantic>=2.13.4",
     "psycopg[binary]>=3.1",
     "pgvector>=0.2",
 ]
 llm = ["anthropic>=0.40"]
 agent = ["glia>=0.8", "anthropic>=0.40"]  # glia-агент (LLM-режим), см. agent.glia_agent
-desktop = ["pywebview>=5.0"]
-eval = ["ragas>=0.2"]
-dev = ["pytest>=8.0", "ruff>=0.4"]
+desktop = ["pywebview>=6.2.1"]
+eval = ["ragas>=0.4.3"]
+dev = ["pytest>=9.1.1", "ruff>=0.16.3"]
 
 [project.scripts]
 praxis-demo = "praxis.demo:main"

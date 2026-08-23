@@ -23,6 +23,8 @@ class CitationOut(BaseModel):
     text: str
     verdict: str | None = None
     span: list[int] | None = None  # [start, end) подтверждающего фрагмента в text
+    source_url: str | None = None  # «сверить с действующей редакцией»
+    act_ref: str | None = None  # реквизиты акта, напр. «51-ФЗ от 30.11.1994»
 
 
 class StatsOut(BaseModel):
@@ -48,6 +50,85 @@ class AnswerOut(BaseModel):
     unverified_claims: list[str]
     steps: list[str]
     related_cases: list[CaseOut] = []
+    claim_applicable: bool = False  # можно ли собрать досудебную претензию (/v1/claim)
+
+
+class ClaimRequest(BaseModel):
+    question: str = Field(..., min_length=1, max_length=1000)
+
+
+class ClaimOut(BaseModel):
+    applicable: bool
+    text: str = ""
+    based_on: list[str] = []  # нормы-основания
+    note: str = ""  # пояснение, когда претензия неприменима
+    disclaimer: str = ""
+
+
+class BasisOut(BaseModel):
+    citation: str
+    source_url: str | None = None
+    note: str = ""
+
+
+class PenaltyRequest(BaseModel):
+    price: float = Field(..., gt=0, description="Цена товара/услуги, ₽")
+    days: int = Field(..., ge=0, le=100_000, description="Дней просрочки")
+    kind: str = Field("товар", description="«товар» (1%/день) или «услуга» (3%/день)")
+
+
+class PenaltyOut(BaseModel):
+    amount: float
+    per_day: float
+    days: int
+    rate_pct: float
+    capped: bool
+    breakdown: str
+    basis: BasisOut
+
+
+class FeeRequest(BaseModel):
+    amount: float = Field(..., ge=0, description="Цена иска, ₽")
+    consumer: bool = Field(False, description="Иск о защите прав потребителей")
+
+
+class FeeOut(BaseModel):
+    fee: float
+    exempt: bool
+    breakdown: str
+    basis: BasisOut
+
+
+class InterestRequest(BaseModel):
+    principal: float = Field(..., gt=0, description="Сумма долга, ₽")
+    rate_pct: float = Field(..., ge=0, le=1000, description="Ключевая ставка ЦБ, % годовых")
+    days: int = Field(..., ge=0, le=100_000, description="Дней просрочки")
+
+
+class InterestOut(BaseModel):
+    amount: float
+    breakdown: str
+    basis: BasisOut
+
+
+class ContractRequest(BaseModel):
+    text: str = Field(..., min_length=1, max_length=200_000)
+
+
+class ContractCheckOut(BaseModel):
+    label: str
+    status: str  # ok | missing | warning
+    citation: str
+    source_url: str | None = None
+    note: str
+
+
+class ContractReviewOut(BaseModel):
+    ok: bool
+    checks: list[ContractCheckOut] = []
+    summary: str = ""
+    note: str = ""
+    disclaimer: str = ""
 
 
 class SearchHit(BaseModel):

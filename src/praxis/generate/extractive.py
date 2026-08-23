@@ -31,12 +31,18 @@ class ExtractiveAnswerer:
             return Answer(question=question, text=_NO_MATCH, confidence=0.0)
 
         citations = [Citation(r.provision) for r in top]
-        lines = ["По вашему вопросу применимы следующие нормы:", ""]
-        for r in top:
-            p = r.provision
-            lines.append(f"• {p.citation} — {p.article_title}:")
-            lines.append(f"  {p.text}")
-            lines.append("")
+        # Ведём ключевой нормой как прямым ответом (её текст — ответ по существу),
+        # остальные перечисляем ссылками: полный текст каждой и так в карточках-цитатах,
+        # дублировать его в тексте ответа — шум.
+        head = top[0].provision
+        lines = [f"Наиболее применимая норма — {head.citation} ({head.article_title}):", ""]
+        lines.append(head.text)
+        rest = top[1:]
+        if rest:
+            lines += ["", "Также относятся к вопросу:"]
+            for r in rest:
+                p = r.provision
+                lines.append(f"• {p.citation} — {p.article_title}")
         return Answer(
             question=question,
             text="\n".join(lines).strip(),

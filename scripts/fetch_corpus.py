@@ -15,9 +15,11 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 from praxis.ingest.sources.json_loader import act_to_dict  # noqa: E402
-from praxis.ingest.sources.wikisource import fetch_code  # noqa: E402
+from praxis.ingest.sources.wikisource import fetch_code, fetch_page_act  # noqa: E402
 
-# id -> (префикс глав на Викитеке, id, полное название, короткое, номер ФЗ, дата)
+_EDITION = "Викитека (транскрипция; сверять с pravo.gov.ru)"
+
+# Кодексы: id -> (префикс глав на Викитеке, id, полное название, короткое, номер ФЗ, дата)
 CODES = {
     "gk": ("Гражданский кодекс РФ/Глава", "gk-rf", "Гражданский кодекс Российской Федерации", "ГК РФ", "51-ФЗ", "1994-11-30"),
     "tk": ("Трудовой кодекс РФ/Глава", "tk-rf", "Трудовой кодекс Российской Федерации", "ТК РФ", "197-ФЗ", "2001-12-30"),
@@ -27,25 +29,30 @@ CODES = {
     "zhk": ("Жилищный кодекс РФ/Глава", "zhk-rf", "Жилищный кодекс Российской Федерации", "ЖК РФ", "188-ФЗ", "2004-12-29"),
 }
 
+# Одностраничные законы (без глав-подстраниц): id -> (страница Викитеки, id, название, короткое, номер, дата)
+LAWS = {
+    "zozpp": ("Закон РФ от 07.02.1992 № 2300-I", "zozpp", "Закон РФ «О защите прав потребителей»", "ЗоЗПП", "2300-I", "1992-02-07"),
+}
+
 
 def main() -> None:
     args = sys.argv[1:]
-    out = Path(args[0]) if args and args[0] not in CODES else Path("corpus")
-    wanted = [a for a in args if a in CODES] or list(CODES)
+    known = set(CODES) | set(LAWS)
+    out = Path(args[0]) if args and args[0] not in known else Path("corpus")
+    wanted = [a for a in args if a in known] or list(known)
     out.mkdir(parents=True, exist_ok=True)
 
-    for code in wanted:
-        prefix, act_id, title, short, number, date = CODES[code]
-        print(f"\nВыгрузка {short} с Викитеки...")
-        raw = fetch_code(
-            prefix,
-            id=act_id,
-            title=title,
-            short_title=short,
-            number=number,
-            date=date,
-            edition="Викитека (транскрипция; сверять с pravo.gov.ru)",
-        )
+    for key in wanted:
+        if key in CODES:
+            prefix, act_id, title, short, number, date = CODES[key]
+            print(f"\nВыгрузка {short} с Викитеки...")
+            raw = fetch_code(prefix, id=act_id, title=title, short_title=short,
+                             number=number, date=date, edition=_EDITION)
+        else:
+            page, act_id, title, short, number, date = LAWS[key]
+            print(f"\nВыгрузка {short} с Викитеки (одна страница)...")
+            raw = fetch_page_act(page, id=act_id, title=title, short_title=short,
+                                 number=number, date=date, edition=_EDITION)
         dest = out / f"{act_id}.json"
         dest.write_text(
             json.dumps(act_to_dict(raw), ensure_ascii=False, indent=1), encoding="utf-8"
