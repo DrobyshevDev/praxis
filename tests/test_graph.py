@@ -1,6 +1,10 @@
 from praxis.core.models import RetrievedProvision
 from praxis.graph.expander import GraphExpandingRetriever
-from praxis.graph.refs import build_reference_graph, extract_references
+from praxis.graph.refs import (
+    build_reference_graph,
+    extract_references,
+    extract_references_by_act,
+)
 from praxis.ingest import load_sample_provisions
 
 
@@ -9,6 +13,23 @@ def test_extract_references():
     assert extract_references("по основаниям, предусмотренным статьёй 450") == {"450"}
     assert extract_references("определяются статьями 15 и 393 настоящего Кодекса") == {"15", "393"}
     assert extract_references("здесь нет ссылок на нормы") == set()
+
+
+def test_extract_references_by_act_detects_code():
+    # маркер кодекса после номера определяет акт
+    assert extract_references_by_act("нарушение статьи 10 ГК РФ") == {("gk-rf", "10")}
+    assert extract_references_by_act("по статье 159 УК РФ") == {("uk-rf", "159")}
+    # общий трейлинг-маркер распространяется на все номера группы
+    assert extract_references_by_act("статьи 15 и 393 ГК РФ") == {("gk-rf", "15"), ("gk-rf", "393")}
+
+
+def test_extract_references_by_act_default_and_skip():
+    # без маркера — берётся default_act_id
+    assert extract_references_by_act("в силу статьи 5", default_act_id="gk-rf") == {("gk-rf", "5")}
+    # без маркера и без default — пропускается
+    assert extract_references_by_act("в силу статьи 5") == set()
+    # процессуальный кодекс (не из корпуса) отбрасывается, даже при default
+    assert extract_references_by_act("статьи 330 ГПК РФ", default_act_id="gk-rf") == set()
 
 
 def test_build_graph_has_expected_edges():
