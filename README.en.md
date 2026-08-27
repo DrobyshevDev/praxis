@@ -184,10 +184,18 @@ How to run it — [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
 
 ## Stack and ecosystem
 
-Python 3.12, FastAPI, Postgres with pgvector, Docker. Retrieval: BM25 and BGE-M3 dense
-embeddings, bge-reranker-v2-m3 as the reranker. Citation checking: NLI on GPU. The LLM is
-plugged in through a provider: Claude for synthesis, Russian providers (GigaChat,
-YandexGPT) for scenarios with data-residency requirements.
+Python 3.12, FastAPI, Docker. Retrieval: BM25 and BGE-M3 dense embeddings,
+bge-reranker-v2-m3 as the reranker. Citation checking: NLI on GPU.
+
+The dense index is held in memory and cached to disk (`PRAXIS_CACHE_DIR`), with a pure
+standard-library fallback — which is why the offline image and CI run without numpy at
+all. A Postgres index with pgvector is designed and not wired:
+`src/praxis/index/schema.sql` is in the repository, a retriever for it is not.
+
+The LLM is plugged in through a provider. Claude for synthesis and a deterministic mock
+for tests are implemented; the provider contract is `src/praxis/llm/base.py`. Russian
+providers (GigaChat, YandexGPT) for data-residency scenarios are the next step, not
+something that can be switched on today.
 
 The project uses two libraries from the same organisation:
 [glia](https://github.com/DrobyshevDev/glia) for the agent loop in LLM mode (search is
