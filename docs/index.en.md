@@ -97,8 +97,13 @@ the Civil Code is already extracted (`corpus/gk-rf.json` — 1,712 articles, 4,7
 provisions, all four parts) and is loaded through `PRAXIS_CORPUS_DIR`. The revision in
 force should always be checked against the official source.
 
-There is no open structured corpus of Russian judicial practice comparable to the
-Caselaw Access Project; that is the next pipeline rather than something already shipped.
+Judicial practice is broken down to the **paragraph of a Supreme Court Plenum ruling**: one
+practice unit is a single paragraph with its holding and the articles it construes, so the
+"norm → practice" graph points to the relevant paragraph (art. 170 of the Civil Code →
+paragraphs 86/87 of Plenum ruling No. 25 on sham and feigned transactions) rather than to
+the ruling as a whole. The set of Plenum rulings on Wikisource is narrow; there is no open
+structured corpus of Russian judicial practice comparable to the Caselaw Access Project —
+full practice (Supreme Court reviews, individual rulings) remains the next pipeline.
 
 ## Next
 

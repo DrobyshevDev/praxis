@@ -35,8 +35,11 @@ def main() -> None:
     ]
     dest = out / "practice.json"
     dest.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
-    for c in cases:
-        print(f"{c.citation}: {len(c.cited_articles)} ссылок на статьи ({c.act_id})")
+
+    from collections import Counter
+
+    by_act = Counter(c.act_id for c in cases)
+    print(f"Пунктов практики: {len(cases)} | по актам: {dict(by_act)}")
     print(f"-> {dest}")
 
 

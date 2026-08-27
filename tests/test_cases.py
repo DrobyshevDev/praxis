@@ -1,5 +1,19 @@
 from praxis.cases import SAMPLE_CASES, build_case_index, related_cases
+from praxis.cases.wikisource import parse_plenum_points
 from praxis.pipeline import build_pipeline
+
+
+def test_parse_plenum_points_splits_numbered():
+    text = (
+        "Вводный абзац без номера.\n"
+        "1. Первый пункт про статью 10 ГК РФ.\n"
+        "Продолжение первого пункта.\n"
+        "2. Второй пункт про статью 15 ГК РФ."
+    )
+    points = parse_plenum_points(text)
+    assert [n for n, _ in points] == [1, 2]
+    assert "Продолжение первого пункта" in points[0][1]  # многострочный пункт склеен
+    assert points[1][1].startswith("Второй пункт")
 
 
 def test_case_index_and_related():
