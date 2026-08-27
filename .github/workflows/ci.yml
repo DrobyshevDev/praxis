@@ -102,11 +102,72 @@ jobs:
           path: dist/
           retention-days: 14
 
+  docker:
+    name: Docker image builds and serves the corpus
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # The image is the first instruction in the README, so a green tick that
+      # cannot fail on a broken image is a green tick about something else. It
+      # also covers the base image, which a Dependabot bump moves without any
+      # other job noticing.
+      - name: Build
+        run: docker build -t praxis:ci .
+
+      - name: Start
+        run: docker run -d --name praxis-ci -p 8077:8077 praxis:ci
+
+      # PRAXIS_OFFLINE=1 is set in the image, so nothing here needs a key, a GPU
+      # or the network. First start is the slow one - the corpus is parsed - so
+      # the wait is generous.
+      - name: Wait for /health
+        run: |
+          for i in $(seq 1 90); do
+            if curl -sf http://localhost:8077/health > /dev/null; then
+              echo "healthy after ${i}s"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "::error::the container did not become healthy within 90s"
+          docker logs praxis-ci
+          exit 1
+
+      # Liveness only proves uvicorn started. This proves the corpus that ships
+      # inside the image can actually be read, which is what the offline
+      # promise rests on.
+      - name: Corpus is loaded
+        run: |
+          set -o pipefail
+          stats=$(curl -sf http://localhost:8077/v1/stats) || {
+            echo "::error::/v1/stats did not answer"
+            docker logs praxis-ci
+            exit 1
+          }
+          echo "$stats"
+          python -c "
+          import json, sys
+          d = json.loads(sys.argv[1])
+          total = sum(v for v in d.values() if isinstance(v, int))
+          if total <= 0:
+              sys.exit('the image reports an empty corpus: ' + sys.argv[1])
+          print('corpus non-empty')
+          " "$stats"
+
+      - name: Container log on failure
+        if: failure()
+        run: docker logs praxis-ci || true
+
+      - name: Stop
+        if: always()
+        run: docker rm -f praxis-ci || true
+
   ci:
     name: CI
     runs-on: ubuntu-latest
     if: always()
-    needs: [lint, test, build]
+    needs: [lint, test, build, docker]
     steps:
       # One aggregate check to require in branch protection. Without it, adding
       # a job to the matrix silently leaves it unrequired, and a red job stops
