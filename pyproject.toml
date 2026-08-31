@@ -27,7 +27,7 @@ llm = ["anthropic>=1.0.0"]
 agent = ["glia>=0.8", "anthropic>=1.0.0"]  # glia-агент (LLM-режим), см. agent.glia_agent
 desktop = ["pywebview>=6.2.1"]
 eval = ["ragas>=0.4.3"]
-dev = ["pytest>=9.1.1", "ruff>=0.16.4"]
+dev = ["pytest>=9.1.1", "ruff>=0.16.5"]
 
 [project.scripts]
 praxis-demo = "praxis.demo:main"
