@@ -28,3 +28,21 @@ def test_render_html_is_selfcontained():
     assert out.startswith("<!doctype html>")
     assert "Praxis" in out and "recall@5" in out
     assert "http://" not in out and "https://" not in out  # без внешних ресурсов
+
+
+def test_readmes_quote_the_real_golden_set_size():
+    """Оба README называют размер набора, и оба называли его неверно.
+
+    В наборе 18 вопросов; README говорили про 12 — столько было, когда абзац
+    писали. Цифру в прозе никто не пересчитывал, а читатель по ней судит,
+    насколько всерьёз измерена заявленная в той же таблице метрика.
+    """
+    import pathlib
+    import re
+
+    root = pathlib.Path(__file__).resolve().parents[1]
+    for name in ("README.md", "README.en.md"):
+        text = (root / name).read_text(encoding="utf-8")
+        match = re.search(r"golden set \((\d+) (?:questions|вопросов)", text)
+        assert match, f"{name}: размер golden set больше не указан в ожидаемой форме"
+        assert int(match.group(1)) == len(GOLDEN), name

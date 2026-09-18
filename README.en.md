@@ -149,7 +149,7 @@ data reluctantly. That is the next stage, as a separate pipeline.
 
 ## Quality
 
-A run of the eval harness over the golden set (12 questions, `praxis-eval`):
+A run of the eval harness over the golden set (18 questions, `praxis-eval`):
 
 | Metric | Real models (RTX 4060) | Offline fallback |
 |---|---|---|
