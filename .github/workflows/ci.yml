@@ -68,7 +68,18 @@ jobs:
       # so the matrix proves exactly one thing: that the promise holds on every
       # interpreter and operating system the package claims to support.
       - name: Run the test suite
-        run: pytest -q
+        run: pytest -q --cov=praxis --cov-report=term-missing --cov-report=xml
+      # Codecov replaces a hand-written badge with a number recomputed on every
+      # run. It uploads once, from one interpreter, so parallel jobs cannot race
+      # to decide what the figure is. Adding CODECOV_TOKEN is what turns the
+      # upload from decoration into a check that can fail.
+      - name: Upload coverage to Codecov
+        if: matrix.os == 'ubuntu-latest' && matrix.python == '3.12'
+        uses: codecov/codecov-action@v5
+        with:
+          files: coverage.xml
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: ${{ secrets.CODECOV_TOKEN != '' }}
 
   build:
     name: Package builds and installs cleanly
