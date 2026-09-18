@@ -5,6 +5,7 @@
 [![CI](https://github.com/DrobyshevDev/praxis/actions/workflows/ci.yml/badge.svg)](https://github.com/DrobyshevDev/praxis/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/DrobyshevDev/praxis/actions/workflows/codeql.yml/badge.svg)](https://github.com/DrobyshevDev/praxis/actions/workflows/codeql.yml)
 [![Coverage](https://codecov.io/gh/DrobyshevDev/praxis/branch/master/graph/badge.svg)](https://codecov.io/gh/DrobyshevDev/praxis)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/DrobyshevDev/praxis/badge)](https://scorecard.dev/viewer/?uri=github.com/DrobyshevDev/praxis)
 [![Лицензия: Apache-2.0](https://img.shields.io/badge/%D0%BB%D0%B8%D1%86%D0%B5%D0%BD%D0%B7%D0%B8%D1%8F-Apache--2.0-blue)](LICENSE)
 [![Python 3.12](https://img.shields.io/badge/python-3.12-blue)](pyproject.toml)
 
