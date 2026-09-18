@@ -39,6 +39,13 @@ jobs:
       - name: ruff check
         run: ruff check src tests scripts clients
 
+      # This repository was the only Python one in the organisation with no type
+      # check, while the organisation's profile says everything here is typed.
+      # Three quarters of the functions carried annotations and nothing read
+      # them; the first run found ten errors.
+      - name: mypy
+        run: mypy
+
   test:
     name: Tests (${{ matrix.os }}, Python ${{ matrix.python }})
     runs-on: ${{ matrix.os }}

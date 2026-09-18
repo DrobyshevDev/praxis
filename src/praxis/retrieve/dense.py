@@ -91,7 +91,10 @@ class DenseRetriever:
             return []
         q = self.embedder.embed_query(query)
 
-        if self._mat is not None:
+        # _mat is only ever assigned inside the try that imported numpy, so the
+        # two are set together or not at all. mypy cannot see that across the
+        # constructor, and stating it here is cheaper than typing _np as Any.
+        if self._mat is not None and self._np is not None:
             np = self._np
             qv = np.asarray(q, dtype="float32")
             qn = float(np.linalg.norm(qv)) or 1.0

@@ -17,6 +17,7 @@ from .generate import default_answerer
 from .graph.expander import GraphExpandingRetriever
 from .ingest import load_sample_provisions
 from .rerank import default_reranker
+from .retrieve.base import Retriever
 from .retrieve.bm25 import BM25Retriever
 from .retrieve.dense import DenseRetriever
 from .retrieve.hybrid import HybridRetriever
@@ -35,6 +36,10 @@ def build_pipeline(
     corpus = load_sample_provisions() if provisions is None else list(provisions)
 
     bm25 = BM25Retriever(corpus)
+    # Declared as the protocol, not as whichever concrete class lands here
+    # first: the name holds a BM25, a hybrid or a graph-expanding retriever
+    # depending on the flags, and all three are Retrievers.
+    retriever: Retriever
     if use_dense:
         dense = DenseRetriever(corpus, default_embedder())
         retriever = HybridRetriever(bm25, dense)
