@@ -153,10 +153,10 @@ A run of the eval harness over the golden set (18 questions, `praxis-eval`):
 
 | Metric | Real models (RTX 4060) | Offline fallback |
 |---|---|---|
-| recall@5 | 1.00 | 1.00 |
-| MRR | 1.00 | 0.90 |
+| recall@5 | 1.00 | 0.97 |
+| MRR | 1.00 | 0.94 |
 | hit-rate | 1.00 | 1.00 |
-| mean confidence | 0.88 | 0.63 |
+| mean confidence | 0.88 | 0.59 |
 | citation precision | 0.29 | 0.40 |
 
 Real models: BGE-M3 for embeddings, bge-reranker-v2-m3 for reranking, rubert-NLI for

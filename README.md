@@ -149,10 +149,10 @@ pravo.gov.ru. На этом построен основной сценарий: 
 
 | Метрика | Реальные модели (RTX 4060) | Офлайн-fallback |
 |---|---|---|
-| recall@5 | 1.00 | 1.00 |
-| MRR | 1.00 | 0.90 |
+| recall@5 | 1.00 | 0.97 |
+| MRR | 1.00 | 0.94 |
 | hit-rate | 1.00 | 1.00 |
-| mean confidence | 0.88 | 0.63 |
+| mean confidence | 0.88 | 0.59 |
 | citation precision | 0.29 | 0.40 |
 
 Реальные модели: BGE-M3 (эмбеддинги), bge-reranker-v2-m3 (реранк), rubert-NLI (проверка
