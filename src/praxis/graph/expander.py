@@ -23,7 +23,12 @@ class GraphExpandingRetriever:
         self,
         base: Retriever,
         provisions: Iterable[Provision],
-        graph: dict[str, set[str]] | None = None,
+        # (act_id, article) -> {(act_id, referenced article)}. The act has to be
+        # in the key: without it article 15 of the Civil Code links to article 15
+        # of the Labour Code, which is what build_reference_graph's docstring
+        # warns about. The annotation said dict[str, set[str]] and invited
+        # exactly that.
+        graph: dict[tuple[str, str], set[tuple[str, str]]] | None = None,
         *,
         hops: int = 1,
         expand_from: int = 5,

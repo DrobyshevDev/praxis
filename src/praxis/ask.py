@@ -33,7 +33,8 @@ def main() -> None:
         print("\n  ИСТОЧНИКИ:")
         verdict_by_id = {vc.citation.provision.id: vc.verdict for vc in answer.verified}
         for c in answer.citations:
-            mark = _MARK.get(verdict_by_id.get(c.provision.id), " ")
+            verdict = verdict_by_id.get(c.provision.id)
+            mark = _MARK[verdict] if verdict is not None else " "
             print(f"   [{mark}] {c.provision.citation} — {c.provision.article_title}")
 
     if answer.unverified_claims:

@@ -43,6 +43,8 @@ class NLIVerifier:
     def verify(self, claim: str, citation: Citation) -> VerifiedClaim:
         model = self._ensure()
         torch = self._torch
+        if torch is None:  # pragma: no cover - _ensure raises before this
+            raise RuntimeError("NLI verification needs torch; _ensure should have raised")
         inputs = self._tok(
             citation.provision.text,
             claim,
