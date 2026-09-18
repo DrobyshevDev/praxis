@@ -66,6 +66,11 @@ jobs:
     name: Build distributions
     needs: verify
     runs-on: ubuntu-latest
+    permissions:
+      # The attestation must be produced by the job that did the building; a
+      # later job holding the same files can only say it downloaded them.
+      id-token: write
+      attestations: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
@@ -89,6 +94,21 @@ jobs:
           /tmp/fresh/bin/praxis-demo --help > /dev/null
           /tmp/fresh/bin/praxis-ask --help > /dev/null
           /tmp/fresh/bin/praxis-eval --help > /dev/null
+
+      # praxis is not on PyPI -- the name belongs to Google's PAX library -- so
+      # the GitHub release is the only place a distribution is published, and
+      # nothing tied one to the run that produced it. attest-build-provenance
+      # signs a SLSA statement naming this repository, this workflow and this
+      # commit as the builder:
+      #
+      #   gh attestation verify <file> --repo DrobyshevDev/praxis
+      #
+      # That matters more here than in a project with a PyPI page, because a
+      # release asset is the whole distribution story.
+      - name: Attest the build provenance
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4
+        with:
+          subject-path: "dist/*"
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
