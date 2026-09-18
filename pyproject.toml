@@ -24,7 +24,9 @@ api = [
     "pgvector>=0.2",
 ]
 llm = ["anthropic>=1.0.0"]
-agent = ["glia>=0.8", "anthropic>=1.0.0"]  # glia-агент (LLM-режим), см. agent.glia_agent
+# Дистрибутив называется glia-agents: имя "glia" на PyPI занято чужим пакетом
+# (Glial Engines, максимум 0.1.0.dev6). Импорт при этом остаётся `glia`.
+agent = ["glia-agents>=0.8", "anthropic>=1.0.0"]  # glia-агент (LLM-режим), см. agent.glia_agent
 desktop = ["pywebview>=6.2.1"]
 eval = ["ragas>=0.4.3"]
 dev = ["pytest>=9.1.1", "pytest-cov>=5.0", "ruff>=0.16.7"]
