@@ -59,7 +59,7 @@ uvicorn praxis.api.app:app --port 8077
 pip install -e ".[ml]"     # BGE-M3, cross-encoder reranker, NLI-верификатор (GPU)
 pip install -e ".[llm]"    # Claude
 export ANTHROPIC_API_KEY=...   # включает LLM-синтез вместо экстрактивного ответа
-docker compose up -d           # Postgres + pgvector (реальный индекс), порт 5434
+docker compose up -d           # Postgres + pgvector: схема будущего индекса (#26), порт 5434
 ```
 
 ## Что где
@@ -76,7 +76,7 @@ docker compose up -d           # Postgres + pgvector (реальный инде�
 | `agent` | self-RAG луп с трейсом | ✅ |
 | `eval` | golden set, метрики, HTML-дашборд | ✅ |
 | `api` | FastAPI + веб-UI | ✅ |
-| `index` | схема Postgres + pgvector | ✅ (SQL) |
+| `index` | схема Postgres + pgvector | 🚧 только SQL, ретривера нет (#26) |
 
 ## Договорённости
 
