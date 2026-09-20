@@ -416,7 +416,10 @@ VERIFIER_SET: list[VerifierCase] = [
 
 def counts_by_verdict() -> dict[Verdict, int]:
     """Сколько пар каждого класса — набор задуман сбалансированным."""
-    counts: dict[Verdict, int] = {v: 0 for v in Verdict}
+    # Явный кортеж, а не обход класса: см. REPORT_ORDER в verifier_runner.
+    counts: dict[Verdict, int] = {
+        v: 0 for v in (Verdict.SUPPORTS, Verdict.UNRELATED, Verdict.CONTRADICTS)
+    }
     for case in VERIFIER_SET:
         counts[case.expected] += 1
     return counts

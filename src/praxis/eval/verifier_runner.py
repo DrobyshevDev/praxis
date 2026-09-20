@@ -26,7 +26,16 @@ from ..core.models import Citation, Verdict
 from ..ingest import load_sample_provisions
 from .verifier_set import VERIFIER_SET, VerifierCase
 
-__all__ = ["VerifierReport", "run_verifier_eval"]
+__all__ = ["REPORT_ORDER", "VerifierReport", "run_verifier_eval"]
+
+#: Порядок классов в отчёте. Назван явно, а не взят из перечисления: порядок,
+#: в котором читают результат, — решение, и оно не должно меняться от того, как
+#: кто-то переставит члены `Verdict`. CONTRADICTS последний намеренно: это тот
+#: класс, пропуск которого и есть отказ верификатора, и он читается последним.
+#:
+#: Побочно это снимает предупреждение CodeQL py/non-iterable-in-for-loop: обход
+#: самого класса-перечисления он не распознаёт, хотя `str, Enum` итерируется.
+REPORT_ORDER: tuple[Verdict, ...] = (Verdict.SUPPORTS, Verdict.UNRELATED, Verdict.CONTRADICTS)
 
 
 @dataclass
@@ -114,7 +123,7 @@ def run_verifier_eval(verifier, cases: list[VerifierCase] | None = None, *, mode
 
     per_class: dict[str, dict] = {}
     confusion: dict[str, dict] = {}
-    for verdict in Verdict:
+    for verdict in REPORT_ORDER:
         subset = [r for r in results if r.expected == verdict.name]
         correct = sum(1 for r in subset if r.correct)
         per_class[verdict.name] = {
@@ -123,7 +132,7 @@ def run_verifier_eval(verifier, cases: list[VerifierCase] | None = None, *, mode
             "accuracy": round(correct / len(subset), 3) if subset else 0.0,
         }
         confusion[verdict.name] = {
-            other.name: sum(1 for r in subset if r.actual == other.name) for other in Verdict
+            other.name: sum(1 for r in subset if r.actual == other.name) for other in REPORT_ORDER
         }
 
     overall = sum(1 for r in results if r.correct) / len(results) if results else 0.0
