@@ -10,13 +10,17 @@ from __future__ import annotations
 
 from ..core.models import Citation, Verdict, VerifiedClaim
 
+#: Модель по умолчанию. Названа здесь, чтобы её можно было прочитать, не
+#: выковыривая из `__init__.__defaults__` — см. praxis.eval.verifier_runner.
+DEFAULT_MODEL = "cointegrated/rubert-base-cased-nli-threeway"
+
 
 class NLIVerifier:
     """Реализует протокол `verify.base.CitationVerifier`."""
 
     def __init__(
         self,
-        model_name: str = "cointegrated/rubert-base-cased-nli-threeway",
+        model_name: str = DEFAULT_MODEL,
         device: str | None = None,
     ) -> None:
         self._model_name = model_name
