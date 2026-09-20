@@ -76,6 +76,15 @@ jobs:
       # interpreter and operating system the package claims to support.
       - name: Run the test suite
         run: pytest -q --cov=praxis --cov-report=term-missing --cov-report=xml
+
+      # "1712 статей, 4717 норм" is written in nine places across two languages
+      # and four files, and nothing opened corpus/ to check any of them. Counted
+      # with praxis's own loader and chunker, because counting the JSON gives a
+      # different answer: an article with no numbered points is still one norm,
+      # and it is the chunker that knows that.
+      - name: The corpus is what the documentation says it is
+        if: matrix.os == 'ubuntu-latest' && matrix.python == '3.12'
+        run: python scripts/check_corpus_claims.py
       # Codecov replaces a hand-written badge with a number recomputed on every
       # run. It uploads once, from one interpreter, so parallel jobs cannot race
       # to decide what the figure is. Adding CODECOV_TOKEN is what turns the
