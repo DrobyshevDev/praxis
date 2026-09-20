@@ -78,6 +78,14 @@ What separates Praxis from a wrapper around chat-with-PDF:
 the text of the provision support this specific claim? What is not confirmed is not
 presented as fact.
 
+That is the mode with models. In the offline fallback — which is what CI runs, and what
+the no-keys demo runs — the verifier reduces to lexical overlap and **cannot detect a
+contradiction**: on the labelled set it gets 0 of 19 contradictions and calls eight of
+them support. Negation does not move it; "the debtor must compensate" and "the debtor
+need not compensate" are the same string to it but for one word. In that mode the check
+filters out the irrelevant, but will not catch a provision that says the opposite.
+Reproduce with `python -m praxis.eval.verifier_runner --heuristic`.
+
 **Agentic self-RAG.** The agent breaks a complex question into sub-queries, searches again
 and reformulates until it has enough grounding. The chain of reasoning is visible in the
 answer.
