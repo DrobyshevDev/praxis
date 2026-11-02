@@ -1,7 +1,7 @@
 # «Скачал и запустил»: работает из коробки без токенов, ключей и GPU.
 # Офлайн-режим (детерминированные компоненты) + полный корпус ГК. Для продового
 # качества добавьте extra ml и GPU (см. docs/DEVELOPMENT.md).
-FROM python:3.14-slim@sha256:caaf356f40667c496d405780745b9ac25771c189a51dfcc42430d531ea09f8a2
+FROM python:3.15-slim@sha256:94d3426f1def7db4a106a232ac121bfd975393e5dfd40a619b955fae45fe7913
 # Pinned by digest, not by tag. `python:3.14-slim` is republished whenever the
 # base is rebuilt, so the image this Dockerfile produced last week and the one
 # it produces today are not the same image and nothing records which was which.
