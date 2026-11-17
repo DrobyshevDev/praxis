@@ -50,8 +50,7 @@ expensive.
 
 Search engines return forums, superseded revisions and SEO noise.
 
-Nothing sits between these options. No tool answers a question at the speed of a model
-but with references you can open and check. That is the space Praxis occupies.
+Praxis tries to combine the speed of a language model with references to the law that can be opened and checked.
 
 ## Who it is for
 
